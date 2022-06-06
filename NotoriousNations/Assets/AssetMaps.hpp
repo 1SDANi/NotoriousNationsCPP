@@ -21,15 +21,19 @@ class AssetMaps
 {
 public:
 	AssetMaps();
+	
+	AssetMaps(std::filesystem::path path_roaming_data_path);
 
-	std::filesystem::path path_get_roaming_data_path();
+	int i_get_tile_size();
+
+	bool b_has_map(std::string s_name);
+
+	Map map_get_map(std::string s_name);
 
 	std::shared_ptr<sf::Texture> p_txtr_get_soil_cover_atlas();
 
 private:
-	int tile_size = 32;
-
-	std::filesystem::path path_roaming_data_path;
+	int i_tile_size = 32;
 
 	void generate_soil_cover_atlas();
 
@@ -49,7 +53,7 @@ private:
 
 	Map map_populate_map(nlohmann::json json_json, std::filesystem::path path_path);
 
-	std::filesystem::path generate_roaming_data_path();
+	std::filesystem::path path_roaming_data_path;
 };
 
 #endif

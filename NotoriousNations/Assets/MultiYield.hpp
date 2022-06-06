@@ -8,10 +8,11 @@
 #include <string>
 #include <vector>
 
-class MultiYield
+class MultiYield : public Asset
 {
 public:
 	MultiYield();
+	MultiYield(std::string s_name);
 
 	bool b_add_yield(std::string s_name);
 

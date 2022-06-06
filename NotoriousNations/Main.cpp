@@ -9,5 +9,6 @@ int main()
 		game_game.update();
 		game_game.late_update();
 		game_game.draw();
+		game_game.update_delta_time();
 	}
 }

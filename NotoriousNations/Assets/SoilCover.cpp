@@ -6,7 +6,7 @@ SoilCover::SoilCover() : TileCover()
 }
 
 
-SoilCover::SoilCover(Int2 int2_atlas_coords) : TileCover(int2_atlas_coords)
+SoilCover::SoilCover(std::string s_name, Int2 int2_atlas_coords) : TileCover(s_name, int2_atlas_coords)
 {
 
 }

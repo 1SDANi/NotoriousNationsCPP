@@ -5,6 +5,10 @@ MultiYield::MultiYield()
 	m_s_i_yields = std::map<std::string, int>();
 }
 
+MultiYield::MultiYield(std::string s_name) : Asset(s_name)
+{
+	m_s_i_yields = std::map<std::string, int>();
+}
 
 bool MultiYield::b_add_yield(std::string s_name)
 {

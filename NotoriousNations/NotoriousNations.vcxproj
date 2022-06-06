@@ -29,6 +29,9 @@
     <ClCompile Include="Assets\Unit.cpp" />
     <ClCompile Include="Assets\UnitType.cpp" />
     <ClCompile Include="Assets\WaterCover.cpp" />
+    <ClCompile Include="Bitmask.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Controller.cpp" />
     <ClCompile Include="FolderCrawler.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Globals.cpp" />
@@ -46,7 +49,12 @@
     <ClInclude Include="Assets\TileCover.hpp" />
     <ClInclude Include="Assets\Unit.hpp" />
     <ClInclude Include="Assets\UnitType.hpp" />
+    <ClInclude Include="Assets\Vector2.hpp" />
+    <ClInclude Include="Assets\Vector3.hpp" />
     <ClInclude Include="Assets\WaterCover.hpp" />
+    <ClInclude Include="Bitmask.hpp" />
+    <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="Controller.hpp" />
     <ClInclude Include="FolderCrawler.hpp" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="Globals.hpp" />
@@ -128,7 +136,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;sfml-audio-d.lib;sfml-network-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Users\bandd\Documents\SFML-2.5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -164,7 +172,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>C:\Users\bandd\Documents\SFML-2.5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-graphics.lib;sfml-window.lib;sfml-system.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sfml-graphics.lib;sfml-window.lib;sfml-system.lib;sfml-audio.lib;sfml-network.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

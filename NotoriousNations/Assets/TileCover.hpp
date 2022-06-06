@@ -9,7 +9,7 @@ class TileCover : public MultiYield
 {
 public:
 	TileCover();
-	TileCover(Int2 int2_atlas_coords);
+	TileCover(std::string s_name, Int2 int2_atlas_coords);
 
 	bool b_has_text(std::string s_text);
 

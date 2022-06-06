@@ -2,18 +2,40 @@
 
 AssetMaps::AssetMaps()
 {
-	this->path_roaming_data_path = generate_roaming_data_path();
+
+}
+
+AssetMaps::AssetMaps(std::filesystem::path path_roaming_data_path)
+{
+	this->path_roaming_data_path = path_roaming_data_path;
 
 	generate_soil_cover_atlas();
 
 	generate_maps();
 }
 
+bool AssetMaps::b_has_map(std::string s_name)
+{
+	return m_s_p_map_maps.contains(s_name);
+}
+
+Map AssetMaps::map_get_map(std::string s_name)
+{
+	if (b_has_map(s_name))
+	{
+		return m_s_p_map_maps[s_name];
+	}
+
+	return Map();
+}
+
 std::shared_ptr<sf::Texture> AssetMaps::p_txtr_get_soil_cover_atlas() { return p_txtr_soil_cover_atlas; }
+
+int AssetMaps::i_get_tile_size() { return i_tile_size; }
 
 void AssetMaps::generate_maps()
 {
-	std::vector<std::filesystem::path>  v_path_matching_paths = FolderCrawler::b_crawl_folder(path_get_roaming_data_path().string() + "\\JSON\\Maps", { L".json" });
+	std::vector<std::filesystem::path>  v_path_matching_paths = FolderCrawler::b_crawl_folder(path_roaming_data_path.string() + "\\JSON\\Maps", { L".json" });
 	if (v_path_matching_paths.size() > 0)
 	{
 		Map map_iteration;
@@ -35,8 +57,6 @@ void AssetMaps::generate_maps()
 
 Map AssetMaps::map_populate_map(nlohmann::json json_json, std::filesystem::path path_path)
 {
-	Map map_map;
-
 	Int2 int2_size = Int2(-1, -1);
 
 	std::string s_shape = "-1";
@@ -68,7 +88,7 @@ Map AssetMaps::map_populate_map(nlohmann::json json_json, std::filesystem::path 
 		int2_size = Int2(json_json.at("i_x"), json_json.at("i_y"));
 	}
 
-	std::vector<Tile> v_tile_tiles(int2_size.x * int2_size.y);
+	std::map<int, Tile> m_i_tile_tiles;
 
 	if (json_json.at("dict_tiles").is_object())
 	{
@@ -95,19 +115,23 @@ Map AssetMaps::map_populate_map(nlohmann::json json_json, std::filesystem::path 
 					std::wcout << L"loaded " << s_soil_cover.c_str() << " at " << s_coords.c_str() << L"\n";
 				}
 
-				tile_tile = Tile(s_tile_name, Int2(i / int2_size.x), m_s_slcv_soil_covers[s_soil_cover]);
+				tile_tile = Tile(s_tile_name, Int2(i % int2_size.x, i / int2_size.x), m_s_slcv_soil_covers[s_soil_cover]);
 			}
 
-			v_tile_tiles[i] = tile_tile;
+			m_i_tile_tiles[i] = tile_tile;
 		}
 	}
+	
+	Map map_map = Map(s_map_name, m_i_tile_tiles, s_shape, int2_size.x);
+
+	map_map.update_soil_cover_texture(p_txtr_soil_cover_atlas, i_tile_size);
 
 	return map_map;
 }
 
 void AssetMaps::generate_soil_cover_atlas()
 {
-	std::vector<std::filesystem::path>  v_path_matching_paths = FolderCrawler::b_crawl_folder(path_get_roaming_data_path().string() + "\\JSON\\SoilCovers", {L".json"});
+	std::vector<std::filesystem::path>  v_path_matching_paths = FolderCrawler::b_crawl_folder(path_roaming_data_path.string() + "\\JSON\\SoilCovers", {L".json"});
 	if (v_path_matching_paths.size() > 0)
 	{
 		std::map<std::string, int> m_s_i_atlas_dimensions = m_s_i_calculate_atlas_dimensions(static_cast<int>(v_path_matching_paths.size()));
@@ -119,7 +143,7 @@ void AssetMaps::generate_soil_cover_atlas()
 		sf::RenderTexture rtxr_temp_texture;
 		sf::Sprite sprt_temp_sprite;
 
-		rtxr_temp_texture.create(tile_size * x, tile_size * y);
+		rtxr_temp_texture.create(i_tile_size * x, i_tile_size * y);
 
 		m_s_slcv_soil_covers = std::map<std::string, SoilCover>();
 
@@ -157,23 +181,27 @@ void AssetMaps::generate_soil_cover_atlas()
 
 			json_json = nlohmann::json::parse(ifst_ifstream);
 
-			slcv_iteration = SoilCover(Int2(i % x, i / x));
+			slcv_iteration = SoilCover("default", Int2(i % x, i / x));
 
 			slcv_iteration = slcv_prepopulate_soil_cover(slcv_iteration, m_s_slcv_soil_covers["default"]);
 
-			slcv_iteration = slcv_populate_soil_cover(SoilCover(), json_json, path_path);
+			slcv_iteration = slcv_populate_soil_cover(slcv_iteration, json_json, path_path);
 
-			std::string s_name = slcv_iteration.s_get_text("s_name");
+			std::string s_name = slcv_iteration.s_get_name();
+
+			std::wcout << s_name.c_str() << L"\n";
 
 			if (!m_s_slcv_soil_covers.contains(s_name) && txtr_temp_texture.loadFromFile(path_path.string().substr(0, path_path.string().size() - 5) + ".png"))
 			{
+				std::wcout << std::to_wstring(i) << L"\n";
+
 				m_s_slcv_soil_covers.emplace(s_name, slcv_iteration);
 
 				sprt_temp_sprite.setTexture(txtr_temp_texture);
-				sprt_temp_sprite.setPosition(static_cast<float>(i % x * tile_size), static_cast<float>(i / x * tile_size));
+				sprt_temp_sprite.setPosition(static_cast<float>((i % x) * i_tile_size), static_cast<float>((i / x) * i_tile_size));
 				rtxr_temp_texture.draw(sprt_temp_sprite);
 
-				std::wcout << L"loaded " << path_path.wstring().substr(0, path_path.wstring().size() - 5) + L".png at (" << std::to_wstring(i / x) + L"," << std::to_wstring(i % x) << L")\n";
+				std::wcout << L"loaded " << path_path.wstring().substr(0, path_path.wstring().size() - 5) + L".png at (" << std::to_wstring(i % x) + L"," << std::to_wstring(i / x) << L")\n";
 				
 				i++;
 			}
@@ -183,7 +211,7 @@ void AssetMaps::generate_soil_cover_atlas()
 	}
 	else
 	{
-		std::throw_with_nested(std::runtime_error(path_get_roaming_data_path().string() + "\\JSON\\SoilCovers contains no .json files"));
+		std::throw_with_nested(std::runtime_error(path_roaming_data_path.string() + "\\JSON\\SoilCovers contains no .json files"));
 	}
 }
 
@@ -197,11 +225,6 @@ std::map<std::string, int> AssetMaps::m_s_i_calculate_atlas_dimensions(int image
 	m_s_i_atlas_dimensions["y"] = (int)std::ceil(d_sqrt);
 
 	return m_s_i_atlas_dimensions;
-}
-
-std::filesystem::path AssetMaps::path_get_roaming_data_path()
-{
-	return path_roaming_data_path;
 }
 
 SoilCover AssetMaps::slcv_prepopulate_soil_cover(SoilCover slcv_soil_cover, SoilCover slcv_default_soil_cover)
@@ -224,6 +247,8 @@ SoilCover AssetMaps::slcv_populate_soil_cover(SoilCover slcv_soil_cover, nlohman
 		std::throw_with_nested(path_path.string() + "is not a SoilCover");
 	}
 
+	slcv_return_soil_cover.b_set_name(json_json.at("s_name"));
+
 	for (const auto& item : json_json.items())
 	{
 		if (item.value().is_number())
@@ -231,7 +256,7 @@ SoilCover AssetMaps::slcv_populate_soil_cover(SoilCover slcv_soil_cover, nlohman
 			slcv_return_soil_cover.b_set_yield(item.key(), item.value());
 		}
 
-		else if (item.value().is_string())
+		else if (item.value().is_string() && item.key() != "s_name")
 		{
 			slcv_return_soil_cover.b_set_text(item.key(), item.value());
 		}
@@ -243,40 +268,4 @@ SoilCover AssetMaps::slcv_populate_soil_cover(SoilCover slcv_soil_cover, nlohman
 	}
 
 	return slcv_return_soil_cover;
-}
-
-// static function
-// sets "path" to a pointer to a unicode string containing the path to the current user's Appdata/Roaming/NotoriousNations folder
-// returns true if "path" is successfully set
-std::filesystem::path AssetMaps::generate_roaming_data_path()
-{
-	std::filesystem::path path_path;
-	PWSTR pwst_path;
-
-	if (SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &pwst_path) != S_OK)
-	{
-		std::throw_with_nested(std::runtime_error("cannot find ...Appdata\\Roaming, got " + (*((wchar_t*)pwst_path))));
-	}
-
-	path_path = std::filesystem::path(pwst_path);
-
-	path_path += "\\NotoriousNations";
-
-	if (path_path.empty())
-	{
-		if (std::filesystem::create_directories(path_path))
-		{
-			std::wcout << L"folder " << path_path.generic_wstring() << L" created" << "\n";
-		}
-		else
-		{
-			std::throw_with_nested(std::runtime_error("failed to create ...Appdata\\Roaming\\NotoriousNations"));
-		}
-	}
-	else
-	{
-		std::wcout << L"folder " << path_path.generic_wstring() << L" found" << "\n";
-	}
-
-	return path_path;
 }

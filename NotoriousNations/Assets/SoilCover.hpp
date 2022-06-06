@@ -8,7 +8,7 @@ class SoilCover : public TileCover
 {
 public:
 	SoilCover();
-	SoilCover(Int2 int2_atlas_coords);
+	SoilCover(std::string s_name, Int2 int2_atlas_coords);
 
 private:
 

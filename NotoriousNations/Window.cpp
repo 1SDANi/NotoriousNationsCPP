@@ -10,9 +10,20 @@ void Window::update()
 	sf::Event event;
 	if (window.pollEvent(event))
 	{
-		if (event.type == sf::Event::Closed)
+		switch (event.type)
 		{
+		case sf::Event::Closed:
 			window.close();
+			break;
+		case sf::Event::MouseWheelScrolled:
+			switch (event.mouseWheelScroll.wheel)
+			{
+			case sf::Mouse::VerticalWheel:
+			case sf::Mouse::HorizontalWheel:
+				Globals::glob_get_globals().update_mouse_wheel_input(event.mouseWheelScroll.wheel, event.mouseWheelScroll.delta);
+				break;
+			}
+			break;
 		}
 	}
 }

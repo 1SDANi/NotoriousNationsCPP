@@ -5,6 +5,8 @@
 #include <string>
 #include <memory>
 
+#include <iostream>
+
 class Asset
 {
 public:
@@ -13,7 +15,7 @@ public:
 
 	std::string s_get_name();
 
-	bool v_set_name(std::string s_name);
+	bool b_set_name(std::string s_name);
 
 private:
 	std::string s_name;

@@ -2,11 +2,12 @@
 #ifndef Window_hpp
 #define Window_hpp
 
+#include "Globals.hpp"
+
 #include <SFML/Graphics.hpp>
 
 class Window
 {
-
 public:
 	Window(const std::string& windowName);
 

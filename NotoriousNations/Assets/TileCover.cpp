@@ -8,8 +8,9 @@ TileCover::TileCover() : MultiYield()
 }
 
 
-TileCover::TileCover(Int2 int2_atlas_coords) : MultiYield()
+TileCover::TileCover(std::string s_name, Int2 int2_atlas_coords) : MultiYield(s_name)
 {
+	std::wcout << std::to_wstring(int2_atlas_coords.x) << L" " << std::to_wstring(int2_atlas_coords.y) << L"\n";
 	this->int2_atlas_coords = int2_atlas_coords;
 	m_s_s_texts = std::map<std::string, std::string>();
 	m_s_b_flags = std::map<std::string, bool>();
