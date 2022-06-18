@@ -1,13 +1,13 @@
 #include "Globals.hpp"
 
-AssetMaps Globals::asmp_get_asset_maps()
+std::shared_ptr<AssetMaps> Globals::p_asmp_get_asset_maps()
 {
-	return asmp_asset_maps;
+	return p_asmp_asset_maps;
 }
 
-Camera Globals::cmra_get_camera()
+std::shared_ptr<Camera> Globals::p_cmra_get_camera()
 {
-	return cmra_camera;
+	return p_cmra_camera;
 }
 
 std::filesystem::path Globals::path_get_roaming_data_path()

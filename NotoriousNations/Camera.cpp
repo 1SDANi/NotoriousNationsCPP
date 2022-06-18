@@ -1,9 +1,23 @@
 #include "Camera.hpp"
 #include "Globals.hpp"
 
+const std::map<int, std::string> Camera::m_i_s_output_type_strings
+{
+	{ CAMERA_OUTPUT_VERTICAL, "Vertical" },
+	{ CAMERA_OUTPUT_HORIZONTAL, "Horizontal" },
+	{ CAMERA_OUTPUT_ZOOM, "Zoom" }
+};
+
+const std::map<std::string, int> Camera::m_s_i_output_type_strings
+{
+	{ "Vertical", CAMERA_OUTPUT_VERTICAL},
+	{ "Horizontal", CAMERA_OUTPUT_HORIZONTAL },
+	{ "Zoom", CAMERA_OUTPUT_ZOOM }
+};
+
 Camera::Camera()
 {
-	vec3_position = Vector3(0, 0, 0);
+	vec3_position = Vector3(0, 0, 1);
 
 	m_i_m_s_i_outputs = std::map<int, std::map<std::string, int>>();
 
@@ -14,7 +28,7 @@ Camera::Camera(std::filesystem::path path_roaming_data_path)
 {
 	this->path_roaming_data_path = path_roaming_data_path;
 
-	vec3_position = Vector3(0, 0);
+	vec3_position = Vector3(0, 0, 1);
 
 	m_i_m_s_i_outputs = std::map<int, std::map<std::string, int>>();
 
@@ -28,14 +42,14 @@ Camera::Camera(std::filesystem::path path_roaming_data_path)
 
 	for (int i = 0; i < Controller::INPUT_TYPE_NUM_INPUT_TYPES; i++)
 	{
-		if (!json_json.contains(Controller::s_input_type_strings[i]))
+		if (!json_json.contains(Controller::m_i_s_input_type_strings.at(i)))
 		{
 			continue;
 		}
 
-		for (auto& [name, key] : json_json.at(Controller::s_input_type_strings[i]).items())
+		for (auto& [name, key] : json_json.at(Controller::m_i_s_input_type_strings.at(i)).items())
 		{
-			m_i_m_s_i_outputs[i][name] = key.at("output");
+			m_i_m_s_i_outputs[i][name] = m_s_i_output_type_strings.at(key.at("output"));
 			m_i_m_s_f_sensitivities[i][name] = key.at("sensitivity");
 		}
 	}
@@ -78,5 +92,12 @@ void Camera::update(float f_delta_time)
 				break;
 			}
 		}
+	}
+
+	vec3_position = Vector3(vec3_position.x + f_horizontal, vec3_position.y + f_vertical, vec3_position.z + f_zoom);
+
+	if (vec3_position.z < -0.9f)
+	{
+		vec3_position = Vector3(vec3_position.x, vec3_position.y, -0.9f);
 	}
 }

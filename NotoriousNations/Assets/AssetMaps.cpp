@@ -12,6 +12,30 @@ AssetMaps::AssetMaps(std::filesystem::path path_roaming_data_path)
 	generate_soil_cover_atlas();
 
 	generate_maps();
+
+	generate_menu_borders();
+}
+
+
+std::shared_ptr<sf::Texture> AssetMaps::p_txtr_get_edge() { return p_txtr_menu_edge; }
+
+std::shared_ptr<sf::Texture> AssetMaps::p_txtr_get_corner() { return p_txtr_menu_corner; }
+
+std::shared_ptr<sf::Texture> AssetMaps::p_txtr_get_cursor() { return p_txtr_menu_cursor; }
+
+void AssetMaps::generate_menu_borders()
+{
+	sf::Texture txtr_temp_texture1;
+	sf::Texture txtr_temp_texture2;
+	sf::Texture txtr_temp_texture3;
+
+	txtr_temp_texture1.loadFromFile(path_roaming_data_path.string() + "\\JSON\\Menu\\Edge.png");
+	txtr_temp_texture2.loadFromFile(path_roaming_data_path.string() + "\\JSON\\Menu\\Corner.png");
+	txtr_temp_texture3.loadFromFile(path_roaming_data_path.string() + "\\JSON\\Menu\\Cursor.png");
+
+	p_txtr_menu_edge = std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture1));
+	p_txtr_menu_corner = std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture2));
+	p_txtr_menu_cursor = std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture3));
 }
 
 bool AssetMaps::b_has_map(std::string s_name)

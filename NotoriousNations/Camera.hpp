@@ -15,13 +15,6 @@ class Globals;
 class Camera
 {
 public:
-	Camera();
-
-	Camera(std::filesystem::path path_roaming_data_path);
-
-	void update(float f_delta_time);
-
-	Vector3 vec3_get_position();
 
 	enum CameraOutput
 	{
@@ -31,6 +24,17 @@ public:
 		CAMERA_OUTPUT_ZOOM,
 		CAMERA_OUTPUT_NUM_OUTPUTS
 	};
+
+	static const std::map<int, std::string> m_i_s_output_type_strings;
+	static const std::map<std::string, int> m_s_i_output_type_strings;
+
+	Camera();
+
+	Camera(std::filesystem::path path_roaming_data_path);
+
+	void update(float f_delta_time);
+
+	Vector3 vec3_get_position();
 
 private:
 	Vector3 vec3_position;

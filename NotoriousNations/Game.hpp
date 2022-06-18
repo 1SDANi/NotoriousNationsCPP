@@ -25,13 +25,18 @@ public:
 	bool b_is_running() const;
 
 private:
-	Window window;
+	Window wndw_window;
 
-	sf::Texture testTexture;
-	sf::Sprite testSprite;
-	sf::Clock clock;
+	sf::Sprite sprt_corners[4];
+	sf::Sprite sprt_edges[2];
+	sf::Sprite sprt_cursors;
+	sf::Sprite sprt_soilcovers;
+
+	sf::Clock clck_clock;
 
 	float f_delta_time;
+
+	float f_buffer_size = 8.0f;
 };
 
 #endif

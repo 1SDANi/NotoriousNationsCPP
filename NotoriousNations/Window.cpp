@@ -1,19 +1,28 @@
 #include "Window.hpp"
 
-Window::Window(const std::string& windowName) : window(sf::VideoMode(800, 600), windowName, sf::Style::Resize)
+Window::Window(const std::string& windowName) : wndw_window(sf::VideoMode(800, 600), windowName, sf::Style::Close | sf::Style::Resize | sf::Style::Titlebar)
 {
-	window.setVerticalSyncEnabled(true);
+	wndw_window.setVerticalSyncEnabled(true);
+	wndw_window.setFramerateLimit(60);
+	
+	view_view = sf::View(wndw_window.getDefaultView());
+	view_view = sf::View(sf::FloatRect(0, 0, 800, 600));
+
+	on_resize();
 }
 
 void Window::update()
 {
 	sf::Event event;
-	if (window.pollEvent(event))
+	if (wndw_window.pollEvent(event))
 	{
 		switch (event.type)
 		{
 		case sf::Event::Closed:
-			window.close();
+			wndw_window.close();
+			break;
+		case sf::Event::Resized:
+			on_resize();
 			break;
 		case sf::Event::MouseWheelScrolled:
 			switch (event.mouseWheelScroll.wheel)
@@ -26,24 +35,45 @@ void Window::update()
 			break;
 		}
 	}
+
+	wndw_window.setView(view_view);
+}
+
+void Window::on_resize()
+{
+	sf::Vector2f size = static_cast<sf::Vector2f>(wndw_window.getSize());
+
+	if (size.x < 160) size.x = 160;
+	if (size.y < 144) size.y = 144;
+
+	wndw_window.setSize(static_cast<sf::Vector2u>(size));
+
+	view_view = sf::View(sf::FloatRect(0.f, 0.f, size.x, size.y));
+
+	wndw_window.setView(view_view);
+}
+
+Vector2 Window::get_size()
+{
+	return Vector2(wndw_window.getSize().x, wndw_window.getSize().y);
 }
 
 void Window::begin_draw()
 {
-	window.clear(sf::Color::Black);
+	wndw_window.clear(sf::Color::Black);
 }
 
 void Window::draw(const sf::Drawable& drawable)
 {
-	window.draw(drawable);
+	wndw_window.draw(drawable);
 }
 
 void Window::end_draw()
 {
-	window.display();
+	wndw_window.display();
 }
 
 bool Window::b_is_open() const
 {
-	return window.isOpen();
+	return wndw_window.isOpen();
 }

@@ -3,6 +3,7 @@
 #define Window_hpp
 
 #include "Globals.hpp"
+#include "Assets/Vector2.hpp"
 
 #include <SFML/Graphics.hpp>
 
@@ -18,8 +19,14 @@ public:
 
 	bool b_is_open() const;
 
+	Vector2 get_size();
+
 private:
-	sf::RenderWindow window;
+	sf::RenderWindow wndw_window;
+
+	sf::View view_view;
+
+	void on_resize();
 };
 
 #endif

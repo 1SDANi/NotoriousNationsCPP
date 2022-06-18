@@ -23,7 +23,7 @@ public:
 		INPUT_TYPE_NUM_INPUT_TYPES
 	};
 
-	static const std::string s_input_type_strings[];
+	static const std::map<int, std::string> m_i_s_input_type_strings;
 
 	Controller();
 

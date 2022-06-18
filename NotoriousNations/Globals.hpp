@@ -20,9 +20,9 @@ public:
         return instance;
     }
 
-	AssetMaps asmp_get_asset_maps();
+    std::shared_ptr<AssetMaps> p_asmp_get_asset_maps();
 
-    Camera cmra_get_camera();
+    std::shared_ptr<Camera> p_cmra_get_camera();
 
     std::filesystem::path path_get_roaming_data_path();
 
@@ -37,9 +37,9 @@ private:
     {
         path_roaming_data_path = generate_roaming_data_path();
 
-        asmp_asset_maps = AssetMaps(path_get_roaming_data_path());
+        p_asmp_asset_maps = std::shared_ptr<AssetMaps>(new AssetMaps(generate_roaming_data_path()));
 
-        cmra_camera = Camera(path_get_roaming_data_path());
+        p_cmra_camera = std::shared_ptr<Camera>(new Camera(path_get_roaming_data_path()));
 
         m_i_cntr_controllers = std::map<int, Controller>();
 
@@ -53,9 +53,9 @@ private:
 
     std::filesystem::path generate_roaming_data_path();
 
-    AssetMaps asmp_asset_maps;
+    std::shared_ptr<AssetMaps> p_asmp_asset_maps;
 
-    Camera cmra_camera;
+    std::shared_ptr<Camera> p_cmra_camera;
 
     std::filesystem::path path_roaming_data_path;
 

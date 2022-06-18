@@ -1,10 +1,10 @@
 #include "Controller.hpp"
 
-const std::string Controller::s_input_type_strings[] =
+const std::map<int, std::string> Controller::m_i_s_input_type_strings
 {
-	"Key",
-	"Mouse Button",
-	"Mouse Wheel"
+	{ INPUT_TYPE_KEY, "Key" },
+	{ INPUT_TYPE_MOUSE_BUTTON, "Mouse Button" },
+	{ INPUT_TYPE_MOUSE_WHEEL, "Mouse Wheel" }
 };
 
 Controller::Controller()
@@ -36,12 +36,12 @@ Controller::Controller(std::filesystem::path path_roaming_data_path)
 	
 	for (int i = 0; i < INPUT_TYPE_NUM_INPUT_TYPES; i++)
 	{
-		if (!json_json.contains(s_input_type_strings[i]))
+		if (!json_json.contains(m_i_s_input_type_strings.at(i)))
 		{
 			continue;
 		}
 
-		for (auto& [name, key] : json_json.at(s_input_type_strings[i]).items())
+		for (auto& [name, key] : json_json.at(m_i_s_input_type_strings.at(i)).items())
 		{
 			m_i_m_s_m_s_i_inputs[i][name]["positive"] = key.at("positive");
 			m_i_m_s_m_s_i_inputs[i][name]["negative"] = key.at("negative");
@@ -59,7 +59,7 @@ void Controller::update()
 	{
 		float p = key["positive"] != -1 ? (float)sf::Keyboard::isKeyPressed((sf::Keyboard::Key)key["positive"]) : 0;
 		float n = key["negative"] != -1 ? 0 - (float)sf::Keyboard::isKeyPressed((sf::Keyboard::Key)key["negative"]) : 0;
-		if (key["invert"]) 
+		if (key.contains("invert") && key["invert"])
 		{
 			p = 0 - p;
 			n = 0 - n;
@@ -71,14 +71,14 @@ void Controller::update()
 	for (auto& [name, mouse_button] : m_i_m_s_m_s_i_inputs[INPUT_TYPE_MOUSE_BUTTON])
 	{
 		float p = mouse_button["positive"] != -1 ? (float)sf::Mouse::isButtonPressed((sf::Mouse::Button)mouse_button["positive"]) : 0.0f;
-		float n = mouse_button["negative"] != -1 ? 0.0f - (float)sf::Mouse::isButtonPressed((sf::Mouse::Button)mouse_button["negative"]) : 0.0f;
-		if (mouse_button["invert"])
+		float n = mouse_button["negative"] != -1 ? 0 - (float)sf::Mouse::isButtonPressed((sf::Mouse::Button)mouse_button["negative"]) : 0.0f;
+		if (mouse_button.contains("invert") && mouse_button["invert"])
 		{
 			p = 0 - p;
 			n = 0 - n;
 		}
 
-		m_i_m_s_f_current_inputs[INPUT_TYPE_KEY][name] = p + n;
+		m_i_m_s_f_current_inputs[INPUT_TYPE_MOUSE_BUTTON][name] = p + n;
 	}
 
 	for (auto& [name, mouse_wheel] : m_i_m_s_m_s_i_inputs[INPUT_TYPE_MOUSE_WHEEL])
@@ -93,7 +93,7 @@ void Controller::update_mouse_wheel_input(int i_wheel, float f_delta)
 	{
 		if (mouse_wheel["positive"] == i_wheel)
 		{
-			if (mouse_wheel["invert"])
+			if (mouse_wheel.contains("invert") && mouse_wheel["invert"])
 			{
 				m_i_m_s_f_current_inputs[INPUT_TYPE_MOUSE_WHEEL][name] += f_delta;
 			}
@@ -104,7 +104,7 @@ void Controller::update_mouse_wheel_input(int i_wheel, float f_delta)
 		}
 		if (mouse_wheel["negative"] == i_wheel)
 		{
-			if (mouse_wheel["invert"])
+			if (mouse_wheel.contains("invert") && mouse_wheel["invert"])
 			{
 				m_i_m_s_f_current_inputs[INPUT_TYPE_MOUSE_WHEEL][name] -= f_delta;
 			}
