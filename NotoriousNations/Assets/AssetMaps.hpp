@@ -32,16 +32,8 @@ public:
 
 	std::shared_ptr<sf::Texture> p_txtr_get_soil_cover_atlas();
 
-	std::shared_ptr<sf::Texture> p_txtr_get_edge();
-
-	std::shared_ptr<sf::Texture> p_txtr_get_corner();
-
-	std::shared_ptr<sf::Texture> p_txtr_get_cursor();
-
 private:
 	int i_tile_size = 32;
-
-	void generate_menu_borders();
 
 	void generate_soil_cover_atlas();
 
@@ -49,15 +41,9 @@ private:
 
 	std::map<std::string, SoilCover> m_s_slcv_soil_covers;
 
-	std::map<std::string, Map> m_s_p_map_maps;
+	std::map<std::string, Map> m_s_map_maps;
 
 	std::shared_ptr<sf::Texture> p_txtr_soil_cover_atlas;
-
-	std::shared_ptr<sf::Texture> p_txtr_menu_edge;
-
-	std::shared_ptr<sf::Texture> p_txtr_menu_corner;
-
-	std::shared_ptr<sf::Texture> p_txtr_menu_cursor;
 
 	std::map<std::string, int> m_s_i_calculate_atlas_dimensions(int images);
 

@@ -22,6 +22,7 @@
     <ClCompile Include="Assets\Asset.cpp" />
     <ClCompile Include="Assets\AssetMaps.cpp" />
     <ClCompile Include="Assets\Map.cpp" />
+    <ClCompile Include="Assets\Menu.cpp" />
     <ClCompile Include="Assets\MultiYield.cpp" />
     <ClCompile Include="Assets\SoilCover.cpp" />
     <ClCompile Include="Assets\Tile.cpp" />
@@ -43,8 +44,13 @@
     <ClInclude Include="Assets\AssetMaps.hpp" />
     <ClInclude Include="Assets\Int2.hpp" />
     <ClInclude Include="Assets\Map.hpp" />
+    <ClInclude Include="Assets\Menu.hpp" />
+    <ClInclude Include="Assets\MenuCalculation.hpp" />
+    <ClInclude Include="Assets\MenuSprite.hpp" />
+    <ClInclude Include="Assets\MenuVariable.hpp" />
     <ClInclude Include="Assets\MultiYield.hpp" />
     <ClInclude Include="Assets\SoilCover.hpp" />
+    <ClInclude Include="Assets\SubMenu.hpp" />
     <ClInclude Include="Assets\Tile.hpp" />
     <ClInclude Include="Assets\TileCover.hpp" />
     <ClInclude Include="Assets\Unit.hpp" />

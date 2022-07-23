@@ -12,42 +12,18 @@ AssetMaps::AssetMaps(std::filesystem::path path_roaming_data_path)
 	generate_soil_cover_atlas();
 
 	generate_maps();
-
-	generate_menu_borders();
-}
-
-
-std::shared_ptr<sf::Texture> AssetMaps::p_txtr_get_edge() { return p_txtr_menu_edge; }
-
-std::shared_ptr<sf::Texture> AssetMaps::p_txtr_get_corner() { return p_txtr_menu_corner; }
-
-std::shared_ptr<sf::Texture> AssetMaps::p_txtr_get_cursor() { return p_txtr_menu_cursor; }
-
-void AssetMaps::generate_menu_borders()
-{
-	sf::Texture txtr_temp_texture1;
-	sf::Texture txtr_temp_texture2;
-	sf::Texture txtr_temp_texture3;
-
-	txtr_temp_texture1.loadFromFile(path_roaming_data_path.string() + "\\JSON\\Menu\\Edge.png");
-	txtr_temp_texture2.loadFromFile(path_roaming_data_path.string() + "\\JSON\\Menu\\Corner.png");
-	txtr_temp_texture3.loadFromFile(path_roaming_data_path.string() + "\\JSON\\Menu\\Cursor.png");
-
-	p_txtr_menu_edge = std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture1));
-	p_txtr_menu_corner = std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture2));
-	p_txtr_menu_cursor = std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture3));
 }
 
 bool AssetMaps::b_has_map(std::string s_name)
 {
-	return m_s_p_map_maps.contains(s_name);
+	return m_s_map_maps.contains(s_name);
 }
 
 Map AssetMaps::map_get_map(std::string s_name)
 {
 	if (b_has_map(s_name))
 	{
-		return m_s_p_map_maps[s_name];
+		return m_s_map_maps[s_name];
 	}
 
 	return Map();
@@ -74,7 +50,7 @@ void AssetMaps::generate_maps()
 
 			map_iteration = map_populate_map(json_json, path_path);
 
-			m_s_p_map_maps[map_iteration.s_get_name()] = map_iteration;
+			m_s_map_maps[map_iteration.s_get_name()] = map_iteration;
 		}
 	}
 }
@@ -114,27 +90,27 @@ Map AssetMaps::map_populate_map(nlohmann::json json_json, std::filesystem::path 
 
 	std::map<int, Tile> m_i_tile_tiles;
 
-	if (json_json.at("dict_tiles").is_object())
+	if (json_json.at("dict_vec2_tile_tiles").is_object())
 	{
 		for (int i = 0; i < int2_size.x * int2_size.y; i++)
 		{
 			s_coords = std::to_string(i % int2_size.x) + "," + std::to_string(i / int2_size.x);
 
-			if (json_json.at("dict_tiles").contains(s_coords))
+			if (json_json.at("dict_vec2_tile_tiles").contains(s_coords))
 			{
-				if (json_json.at("dict_tiles").at(s_coords).at("s_type") != "Tile")
+				if (json_json.at("dict_vec2_tile_tiles").at(s_coords).at("s_type") != "Tile")
 				{
-					std::throw_with_nested(path_path.string() + "/dict_tiles/" + s_coords + "/s_type " + "is not a Tile");
+					std::throw_with_nested(path_path.string() + "/dict_vec2_tile_tiles/" + s_coords + "/s_type " + "is not a Tile");
 				}
 
-				if (json_json.at("dict_tiles").at(s_coords).at("s_name").is_string())
+				if (json_json.at("dict_vec2_tile_tiles").at(s_coords).at("s_name").is_string())
 				{
-					s_tile_name = json_json.at("dict_tiles").at(s_coords).at("s_name");
+					s_tile_name = json_json.at("dict_vec2_tile_tiles").at(s_coords).at("s_name");
 				}
 
-				if (json_json.at("dict_tiles").at(s_coords).at("s_soil_cover").is_string())
+				if (json_json.at("dict_vec2_tile_tiles").at(s_coords).at("s_soil_cover").is_string())
 				{
-					s_soil_cover = json_json.at("dict_tiles").at(s_coords).at("s_soil_cover");
+					s_soil_cover = json_json.at("dict_vec2_tile_tiles").at(s_coords).at("s_soil_cover");
 
 					std::wcout << L"loaded " << s_soil_cover.c_str() << " at " << s_coords.c_str() << L"\n";
 				}

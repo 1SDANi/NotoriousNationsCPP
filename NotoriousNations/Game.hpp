@@ -6,6 +6,8 @@
 #include "Globals.hpp"
 #include "Controller.hpp"
 
+#include "Assets/Menu.hpp"
+
 #include <iostream>
 
 class Game
@@ -27,16 +29,15 @@ public:
 private:
 	Window wndw_window;
 
-	sf::Sprite sprt_corners[4];
-	sf::Sprite sprt_edges[2];
-	sf::Sprite sprt_cursors;
-	sf::Sprite sprt_soilcovers;
-
 	sf::Clock clck_clock;
+
+	Menu menu;
 
 	float f_delta_time;
 
 	float f_buffer_size = 8.0f;
+
+	sf::Sprite sprt_soilcovers;
 };
 
 #endif
