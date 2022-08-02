@@ -37,7 +37,10 @@ private:
 
 	float f_buffer_size = 8.0f;
 
-	sf::Sprite sprt_soilcovers;
+	std::shared_ptr<sf::Texture> p_txtr_cursor;
+
+	//for some reason, the cursor doesn't want to draw if its code is in Camera.hpp/cpp
+	sf::Sprite sprt_cursor;
 };
 
 #endif

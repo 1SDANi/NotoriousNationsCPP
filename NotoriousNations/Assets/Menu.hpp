@@ -40,7 +40,7 @@ private:
 
 	std::map<std::string, std::map<int, sf::Sprite>> m_s_m_i_sprt_sprites;
 
-	std::map<std::string, std::shared_ptr<sf::Texture>> m_s_p_txtr_menu_edge;
+	std::map<std::string, std::shared_ptr<sf::Texture>> m_s_p_txtr_textures;
 
 	std::map<std::string, SubMenu> m_s_sbmn_submenus;
 };

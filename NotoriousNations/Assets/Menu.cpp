@@ -261,22 +261,22 @@ std::map<int, MenuSprite> Menu::m_i_mnsp_populate_menu_sprites(nlohmann::json js
 
 void Menu::generate_submenu_sprites(std::string s_name)
 {
-	m_s_p_txtr_menu_edge = std::map<std::string, std::shared_ptr<sf::Texture>>();
+	m_s_p_txtr_textures = std::map<std::string, std::shared_ptr<sf::Texture>>();
 
 	for (auto const& [i_index, mnsp_menu_sprite] : m_s_sbmn_submenus[s_name].m_i_mnsp_menu_sprites)
 	{
-		if (!m_s_p_txtr_menu_edge.contains(mnsp_menu_sprite.s_texture))
+		if (!m_s_p_txtr_textures.contains(mnsp_menu_sprite.s_texture))
 		{
 			sf::Texture txtr_temp_texture;
 
 			txtr_temp_texture.loadFromFile(Globals::glob_get_globals().path_get_roaming_data_path().string() + mnsp_menu_sprite.s_texture);
 
-			m_s_p_txtr_menu_edge.emplace(mnsp_menu_sprite.s_texture, std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture)));
+			m_s_p_txtr_textures.emplace(mnsp_menu_sprite.s_texture, std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture)));
 		}
 		
 		m_s_m_i_sprt_sprites.at(s_name).emplace(i_index, sf::Sprite());
 
-		m_s_m_i_sprt_sprites.at(s_name).at(i_index).setTexture(*m_s_p_txtr_menu_edge.at(mnsp_menu_sprite.s_texture));
+		m_s_m_i_sprt_sprites.at(s_name).at(i_index).setTexture(*m_s_p_txtr_textures.at(mnsp_menu_sprite.s_texture));
 	}
 }
 

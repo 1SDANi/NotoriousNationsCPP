@@ -41,6 +41,21 @@ Controller Globals::cntr_get_controller(int i_controller)
 	return Controller();
 }
 
+void Globals::gained_focus()
+{
+	b_has_focus = true;
+}
+
+void Globals::lost_focus()
+{
+	b_has_focus = false;
+}
+
+bool Globals::b_is_has_focus()
+{
+	return b_has_focus;
+}
+
 // static function
 // sets "path" to a pointer to a unicode string containing the path to the current user's Appdata/Roaming/NotoriousNations folder
 // returns true if "path" is successfully set

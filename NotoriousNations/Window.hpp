@@ -19,7 +19,9 @@ public:
 
 	bool b_is_open() const;
 
-	Vector2 get_size();
+	Vector2 vec2_get_size();
+
+	sf::Vector2i vc2i_get_mouse_position();
 
 private:
 	sf::RenderWindow wndw_window;

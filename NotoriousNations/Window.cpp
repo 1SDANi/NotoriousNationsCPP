@@ -24,6 +24,12 @@ void Window::update()
 		case sf::Event::Resized:
 			on_resize();
 			break;
+		case sf::Event::GainedFocus:
+			Globals::glob_get_globals().gained_focus();
+			break;
+		case sf::Event::LostFocus:
+			Globals::glob_get_globals().lost_focus();
+			break;
 		case sf::Event::MouseWheelScrolled:
 			switch (event.mouseWheelScroll.wheel)
 			{
@@ -35,8 +41,6 @@ void Window::update()
 			break;
 		}
 	}
-
-	wndw_window.setView(view_view);
 }
 
 void Window::on_resize()
@@ -53,7 +57,7 @@ void Window::on_resize()
 	wndw_window.setView(view_view);
 }
 
-Vector2 Window::get_size()
+Vector2 Window::vec2_get_size()
 {
 	return Vector2(wndw_window.getSize().x, wndw_window.getSize().y);
 }
@@ -76,4 +80,9 @@ void Window::end_draw()
 bool Window::b_is_open() const
 {
 	return wndw_window.isOpen();
+}
+
+sf::Vector2i Window::vc2i_get_mouse_position()
+{
+	return sf::Mouse::getPosition(wndw_window);
 }

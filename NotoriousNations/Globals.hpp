@@ -2,9 +2,10 @@
 #ifndef Globals_hpp
 #define Globals_hpp
 
-#include "Assets/AssetMaps.hpp"
 #include "Camera.hpp"
 #include "Controller.hpp"
+
+#include "Assets/AssetMaps.hpp"
 
 #include <Shlobj_core.h>
 #include <SFML/Graphics.hpp>
@@ -32,6 +33,12 @@ public:
 
     void update_mouse_wheel_input(int i_wheel, float f_delta);
 
+    void gained_focus();
+
+    void lost_focus();
+
+    bool b_is_has_focus();
+
 private:
     Globals()
     {
@@ -44,6 +51,8 @@ private:
         m_i_cntr_controllers = std::map<int, Controller>();
 
         m_i_cntr_controllers[0] = Controller(path_get_roaming_data_path());
+
+        b_has_focus = true;
     }
 
     Globals(Globals const&);
@@ -60,6 +69,8 @@ private:
     std::filesystem::path path_roaming_data_path;
 
     std::map<int, Controller> m_i_cntr_controllers;
+
+    bool b_has_focus;
 };
 
 #endif
