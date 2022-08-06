@@ -1,5 +1,10 @@
 #include "Globals.hpp"
 
+bool Globals::b_is_open() const
+{
+	return wndw_window.b_is_open();
+}
+
 std::shared_ptr<AssetMaps> Globals::p_asmp_get_asset_maps()
 {
 	return p_asmp_asset_maps;
@@ -8,6 +13,11 @@ std::shared_ptr<AssetMaps> Globals::p_asmp_get_asset_maps()
 std::shared_ptr<Camera> Globals::p_cmra_get_camera()
 {
 	return p_cmra_camera;
+}
+
+std::shared_ptr<Menu> Globals::p_menu_get_menu()
+{
+	return p_menu_menu;
 }
 
 std::filesystem::path Globals::path_get_roaming_data_path()
@@ -23,12 +33,42 @@ void Globals::update_controllers()
 	}
 }
 
+Vector2 Globals::vec2_get_window_size()
+{
+	return wndw_window.vec2_get_size();
+}
+
+sf::Vector2i Globals::vc2i_get_mouse_position()
+{
+	return wndw_window.vc2i_get_mouse_position();
+}
+
 void Globals::update_mouse_wheel_input(int i_wheel, float f_delta)
 {
 	for (auto& [slot, controller] : m_i_cntr_controllers)
 	{
 		controller.update_mouse_wheel_input(i_wheel, f_delta);
 	}
+}
+
+void Globals::update_window()
+{
+	wndw_window.update();
+}
+
+void Globals::begin_draw()
+{
+	wndw_window.begin_draw();
+}
+
+void Globals::draw(const sf::Drawable& drawable)
+{
+	wndw_window.draw(drawable);
+}
+
+void Globals::end_draw()
+{
+	wndw_window.end_draw();
 }
 
 Controller Globals::cntr_get_controller(int i_controller)
@@ -90,4 +130,9 @@ std::filesystem::path Globals::generate_roaming_data_path()
 	}
 
 	return path_path;
+}
+
+void Globals::edit_soil_cover(std::string s_name, int i)
+{
+	p_asmp_asset_maps->set_soil_cover("Test Map 1", p_cmra_camera->int2_get_cursor_position(), p_asmp_asset_maps->m_sslcv_get_soil_covers()[p_menu_menu->m_i_s_get_toolbar_sprite_names(vec2_get_window_size(), "Toolbar")[i]]);
 }

@@ -9,7 +9,7 @@
 struct MenuVariable {
 	std::string s_name;
 	std::string s_value;
-	float f_output;
+	float f_output = -1.0f;
 	std::map<int, MenuCalculation> m_i_mncl_menu_calculations;
 };
 

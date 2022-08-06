@@ -28,9 +28,13 @@ public:
 
 	bool b_has_map(std::string s_name);
 
-	Map map_get_map(std::string s_name);
+	std::shared_ptr<Map> p_map_get_map(std::string s_name);
+
+	void set_soil_cover(std::string s_map, Int2 int2_coordinates, SoilCover scvr_soil_cover);
 
 	std::shared_ptr<sf::Texture> p_txtr_get_soil_cover_atlas();
+
+	std::map<std::string, SoilCover> m_sslcv_get_soil_covers();
 
 private:
 	int i_tile_size = 32;
@@ -41,7 +45,7 @@ private:
 
 	std::map<std::string, SoilCover> m_s_slcv_soil_covers;
 
-	std::map<std::string, Map> m_s_map_maps;
+	std::map<std::string, std::shared_ptr<Map>> m_s_p_map_maps;
 
 	std::shared_ptr<sf::Texture> p_txtr_soil_cover_atlas;
 

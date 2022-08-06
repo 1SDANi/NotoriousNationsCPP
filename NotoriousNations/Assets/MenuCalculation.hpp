@@ -15,7 +15,7 @@ enum MenuOperation
 };
 
 struct MenuCalculation {
-	int i_operation;
+	int i_operation = -1;
 	std::string s_value;
 };
 

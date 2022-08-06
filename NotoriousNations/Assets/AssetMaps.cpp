@@ -16,20 +16,27 @@ AssetMaps::AssetMaps(std::filesystem::path path_roaming_data_path)
 
 bool AssetMaps::b_has_map(std::string s_name)
 {
-	return m_s_map_maps.contains(s_name);
+	return m_s_p_map_maps.contains(s_name);
 }
 
-Map AssetMaps::map_get_map(std::string s_name)
+std::shared_ptr<Map> AssetMaps::p_map_get_map(std::string s_name)
 {
 	if (b_has_map(s_name))
 	{
-		return m_s_map_maps[s_name];
+		return m_s_p_map_maps[s_name];
 	}
 
-	return Map();
+	return std::make_shared<Map>(Map());
+}
+
+void AssetMaps::set_soil_cover(std::string s_map, Int2 int2_coordinates, SoilCover scvr_soil_cover)
+{
+	m_s_p_map_maps[s_map]->set_soil_cover(int2_coordinates, scvr_soil_cover, p_txtr_soil_cover_atlas, i_tile_size);
 }
 
 std::shared_ptr<sf::Texture> AssetMaps::p_txtr_get_soil_cover_atlas() { return p_txtr_soil_cover_atlas; }
+
+std::map<std::string, SoilCover> AssetMaps::m_sslcv_get_soil_covers() { return m_s_slcv_soil_covers; }
 
 int AssetMaps::i_get_tile_size() { return i_tile_size; }
 
@@ -50,7 +57,7 @@ void AssetMaps::generate_maps()
 
 			map_iteration = map_populate_map(json_json, path_path);
 
-			m_s_map_maps[map_iteration.s_get_name()] = map_iteration;
+			m_s_p_map_maps[map_iteration.s_get_name()] = std::make_shared<Map>(map_iteration);
 		}
 	}
 }
@@ -66,7 +73,7 @@ Map AssetMaps::map_populate_map(nlohmann::json json_json, std::filesystem::path 
 	std::string s_tile_name = "-1";
 	std::string s_soil_cover = "-1";
 
-	Tile tile_tile = Tile();
+	std::shared_ptr<Tile> p_tile_tile = std::make_shared<Tile>();
 
 	if (json_json.at("s_type") != "Map")
 	{
@@ -88,7 +95,7 @@ Map AssetMaps::map_populate_map(nlohmann::json json_json, std::filesystem::path 
 		int2_size = Int2(json_json.at("i_x"), json_json.at("i_y"));
 	}
 
-	std::map<int, Tile> m_i_tile_tiles;
+	std::map<int, std::shared_ptr<Tile>> m_i_tile_tiles;
 
 	if (json_json.at("dict_vec2_tile_tiles").is_object())
 	{
@@ -115,10 +122,10 @@ Map AssetMaps::map_populate_map(nlohmann::json json_json, std::filesystem::path 
 					std::wcout << L"loaded " << s_soil_cover.c_str() << " at " << s_coords.c_str() << L"\n";
 				}
 
-				tile_tile = Tile(s_tile_name, Int2(i % int2_size.x, i / int2_size.x), m_s_slcv_soil_covers[s_soil_cover]);
+				p_tile_tile = std::make_shared<Tile>(s_tile_name, Int2(i % int2_size.x, i / int2_size.x), m_s_slcv_soil_covers[s_soil_cover]);
 			}
 
-			m_i_tile_tiles[i] = tile_tile;
+			m_i_tile_tiles[i] = p_tile_tile;
 		}
 	}
 	
@@ -189,12 +196,8 @@ void AssetMaps::generate_soil_cover_atlas()
 
 			std::string s_name = slcv_iteration.s_get_name();
 
-			std::wcout << s_name.c_str() << L"\n";
-
 			if (!m_s_slcv_soil_covers.contains(s_name) && txtr_temp_texture.loadFromFile(path_path.string().substr(0, path_path.string().size() - 5) + ".png"))
 			{
-				std::wcout << std::to_wstring(i) << L"\n";
-
 				m_s_slcv_soil_covers.emplace(s_name, slcv_iteration);
 
 				sprt_temp_sprite.setTexture(txtr_temp_texture);

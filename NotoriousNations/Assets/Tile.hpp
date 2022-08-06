@@ -11,14 +11,16 @@ class Tile : Asset
 {
 public:
 	Tile();
-	Tile(std::string s_name, Int2 position, SoilCover slcv_soil_cover);
+	Tile(std::string s_name, Int2 position, SoilCover scvr_soil_cover);
 
-	SoilCover slcv_get_soil_cover();
+	SoilCover scvr_get_soil_cover();
+
+	void scvr_set_soil_cover(SoilCover scvr_soil_cover);
 
 	Int2 int2_get_position();
 
 private:
-	SoilCover slcv_soil_cover;
+	SoilCover scvr_soil_cover;
 
 	Int2 int2_position;
 };

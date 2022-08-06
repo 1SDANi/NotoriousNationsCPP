@@ -1,25 +1,31 @@
 #include "Camera.hpp"
 
+#include "Globals.hpp"
+
 const std::map<int, std::string> Camera::m_i_s_output_type_strings
 {
-	{ CAMERA_OUTPUT_VERTICAL, "Vertical" },
-	{ CAMERA_OUTPUT_HORIZONTAL, "Horizontal" },
-	{ CAMERA_OUTPUT_ZOOM, "Zoom" }
+	{ (int)CameraOutput::CAMERA_OUTPUT_VERTICAL, "Vertical" },
+	{ (int)CameraOutput::CAMERA_OUTPUT_HORIZONTAL, "Horizontal" },
+	{ (int)CameraOutput::CAMERA_OUTPUT_ZOOM, "Zoom" },
+	{ (int)CameraOutput::CAMERA_OUTPUT_SELECT, "Select" },
+	{ (int)CameraOutput::CAMERA_OUTPUT_CANCEL, "Cancel" }
 };
 
 const std::map<std::string, int> Camera::m_s_i_output_type_strings
 {
-	{ "Vertical", CAMERA_OUTPUT_VERTICAL},
-	{ "Horizontal", CAMERA_OUTPUT_HORIZONTAL },
-	{ "Zoom", CAMERA_OUTPUT_ZOOM },
-	{ "Select", CAMERA_OUTPUT_SELECT },
-	{ "Cancel", CAMERA_OUTPUT_CANCEL }
+	{ "Vertical", (int)CameraOutput::CAMERA_OUTPUT_VERTICAL},
+	{ "Horizontal", (int)CameraOutput::CAMERA_OUTPUT_HORIZONTAL },
+	{ "Zoom", (int)CameraOutput::CAMERA_OUTPUT_ZOOM },
+	{ "Select", (int)CameraOutput::CAMERA_OUTPUT_SELECT },
+	{ "Cancel", (int)CameraOutput::CAMERA_OUTPUT_CANCEL }
 };
 
 Camera::Camera()
 {
 
-	int2_cursor_position = Int2(0, 0);
+	int2_cursor_position = Int2(-1, -1);
+
+	b_cursor_updated = true;
 
 	vec3_position = Vector3(0, 0, 1);
 
@@ -30,7 +36,9 @@ Camera::Camera()
 
 Camera::Camera(std::filesystem::path path_roaming_data_path)
 {
-	int2_cursor_position = Int2(0, 0);
+	int2_cursor_position = Int2(-1, -1);
+
+	b_cursor_updated = true;
 
 	this->path_roaming_data_path = path_roaming_data_path;
 
@@ -59,6 +67,8 @@ Camera::Camera(std::filesystem::path path_roaming_data_path)
 			m_i_m_s_f_sensitivities[i][name] = key.at("sensitivity");
 		}
 	}
+
+	b_cursor_updated = true;
 }
 
 Vector3 Camera::vec3_get_position()
@@ -69,6 +79,18 @@ Vector3 Camera::vec3_get_position()
 Int2 Camera::int2_get_cursor_position()
 {
 	return int2_cursor_position;
+}
+
+bool Camera::b_is_cursor_updated()
+{
+	if (b_cursor_updated)
+	{
+		b_cursor_updated = false;
+
+		return true;
+	}
+
+	return false;
 }
 
 void Camera::update(Controller cntr_controller, sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, float f_delta_time, int i_tile_size)
@@ -88,22 +110,22 @@ void Camera::update(Controller cntr_controller, sf::Vector2i vc2i_mouse_position
 		{
 			switch (key)
 			{
-			case CAMERA_OUTPUT_VERTICAL:
+			case (int)CameraOutput::CAMERA_OUTPUT_VERTICAL:
 				f_vertical += cntr_controller.f_get_input(i, name) * m_i_m_s_f_sensitivities[i][name];
 				break;
-			case CAMERA_OUTPUT_HORIZONTAL:
+			case (int)CameraOutput::CAMERA_OUTPUT_HORIZONTAL:
 				f_horizontal += cntr_controller.f_get_input(i, name) * m_i_m_s_f_sensitivities[i][name];
 				break;
-			case CAMERA_OUTPUT_ZOOM:
+			case (int)CameraOutput::CAMERA_OUTPUT_ZOOM:
 				f_zoom += cntr_controller.f_get_input(i, name) * m_i_m_s_f_sensitivities[i][name];
 				break;
-			case CAMERA_OUTPUT_SELECT:
+			case (int)CameraOutput::CAMERA_OUTPUT_SELECT:
 				if (cntr_controller.b_is_input_changed(i, name) && cntr_controller.b_is_input_neutral(i, name))
 				{
 					select(vc2i_mouse_position, vec2_window_size, i_tile_size);
 				}
 				break;
-			case CAMERA_OUTPUT_CANCEL:
+			case (int)CameraOutput::CAMERA_OUTPUT_CANCEL:
 				if (cntr_controller.b_is_input_changed(i, name) && cntr_controller.b_is_input_neutral(i, name))
 				{
 					cancel();
@@ -131,7 +153,24 @@ void Camera::select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, 
 		return;
 	}
 
-	if (vc2i_mouse_position.y < vec2_window_size.y - vec2_window_size.y * f_toolbar_height)
+	std::shared_ptr p_menu_menu = Globals::glob_get_globals().p_menu_get_menu();
+
+	sf::FloatRect frct_toolbar_bounds = p_menu_menu->frct_get_toolbar_bounds(vec2_window_size, "Toolbar");
+	std::map<int, sf::FloatRect> m_i_frct_icon_bounds = p_menu_menu->m_i_frct_get_icon_bounds(vec2_window_size, "Toolbar");
+
+	if (frct_toolbar_bounds.contains((sf::Vector2f)vc2i_mouse_position))
+	{
+		for (int i = 0; i < m_i_frct_icon_bounds.size(); i++)
+		{
+			if (m_i_frct_icon_bounds[i].contains((sf::Vector2f)vc2i_mouse_position))
+			{
+				Globals::glob_get_globals().edit_soil_cover("Toolbar", i);
+
+				b_cursor_updated = true;
+			}
+		}
+	}
+	else
 	{
 		if (sprt_soilcovers.getGlobalBounds().contains((sf::Vector2f)vc2i_mouse_position))
 		{
@@ -140,20 +179,20 @@ void Camera::select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, 
 
 			Vector2 vec2_soilcover_dimensions = Vector2(sprt_soilcovers.getTexture()->getSize().x / (float)i_tile_size, sprt_soilcovers.getTexture()->getSize().y / (float)i_tile_size);
 
-			Int2 int2_clicked_position = Int2(relative_mouse_position.x /  (float)i_tile_size, relative_mouse_position.y / (float)i_tile_size);
+			Int2 int2_clicked_position = Int2((int)(relative_mouse_position.x /  (float)i_tile_size), (int)(relative_mouse_position.y / (float)i_tile_size));
 
 			int2_cursor_position = int2_clicked_position;
+
+			b_cursor_updated = true;
 		}
-	}
-	else
-	{
-		
 	}
 }
 
 void Camera::cancel()
 {
+	int2_cursor_position = Int2(-1, -1);
 
+	b_cursor_updated = true;
 }
 
 void Camera::late_update(int i_tile_size)

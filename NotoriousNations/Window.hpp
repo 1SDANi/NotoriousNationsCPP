@@ -2,7 +2,6 @@
 #ifndef Window_hpp
 #define Window_hpp
 
-#include "Globals.hpp"
 #include "Assets/Vector2.hpp"
 
 #include <SFML/Graphics.hpp>

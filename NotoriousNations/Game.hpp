@@ -27,11 +27,7 @@ public:
 	bool b_is_running() const;
 
 private:
-	Window wndw_window;
-
 	sf::Clock clck_clock;
-
-	Menu menu;
 
 	float f_delta_time;
 
@@ -40,7 +36,9 @@ private:
 	std::shared_ptr<sf::Texture> p_txtr_cursor;
 
 	//for some reason, the cursor doesn't want to draw if its code is in Camera.hpp/cpp
-	sf::Sprite sprt_cursor;
+	sf::Sprite sprt_camera_cursor;
+
+	sf::Sprite sprt_menu_cursor;
 };
 
 #endif

@@ -4,8 +4,10 @@
 
 #include "Camera.hpp"
 #include "Controller.hpp"
+#include "Window.hpp"
 
 #include "Assets/AssetMaps.hpp"
+#include "Assets/Menu.hpp"
 
 #include <Shlobj_core.h>
 #include <SFML/Graphics.hpp>
@@ -25,9 +27,23 @@ public:
 
     std::shared_ptr<Camera> p_cmra_get_camera();
 
+    std::shared_ptr<Menu> p_menu_get_menu();
+
     std::filesystem::path path_get_roaming_data_path();
 
     Controller cntr_get_controller(int i_controller);
+
+    Vector2 vec2_get_window_size();
+
+    sf::Vector2i vc2i_get_mouse_position();
+
+    bool b_is_open() const;
+
+    void update_window();
+
+    void begin_draw();
+    void draw(const sf::Drawable& drawable);
+    void end_draw();
 
     void update_controllers();
 
@@ -39,14 +55,26 @@ public:
 
     bool b_is_has_focus();
 
+    void edit_soil_cover(std::string s_name, int i);
+
+    static constexpr uint32_t hash(std::string_view data) noexcept {
+        uint32_t hash = 5385;
+
+        for (const auto& e : data) hash = ((hash << 5) + hash) + e;
+
+        return hash;
+    }
+
 private:
-    Globals()
+    Globals() : wndw_window("Notorious Nations")
     {
         path_roaming_data_path = generate_roaming_data_path();
 
         p_asmp_asset_maps = std::shared_ptr<AssetMaps>(new AssetMaps(generate_roaming_data_path()));
 
         p_cmra_camera = std::shared_ptr<Camera>(new Camera(path_get_roaming_data_path()));
+
+        p_menu_menu = std::shared_ptr<Menu>(new Menu(path_get_roaming_data_path()));
 
         m_i_cntr_controllers = std::map<int, Controller>();
 
@@ -57,6 +85,8 @@ private:
 
     Globals(Globals const&);
 
+    Window wndw_window;
+
     // leave undefined
     void operator=(Globals const&);
 
@@ -65,6 +95,8 @@ private:
     std::shared_ptr<AssetMaps> p_asmp_asset_maps;
 
     std::shared_ptr<Camera> p_cmra_camera;
+
+    std::shared_ptr<Menu> p_menu_menu;
 
     std::filesystem::path path_roaming_data_path;
 

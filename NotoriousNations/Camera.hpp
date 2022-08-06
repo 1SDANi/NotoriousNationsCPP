@@ -17,7 +17,7 @@ class Camera
 {
 public:
 
-	enum CameraOutput
+	enum class CameraOutput
 	{
 		CAMERA_OUTPUT_NONE = -1,
 		CAMERA_OUTPUT_VERTICAL,
@@ -47,6 +47,8 @@ public:
 
 	Int2 int2_get_cursor_position();
 
+	bool b_is_cursor_updated();
+
 private:
 	Vector3 vec3_position;
 
@@ -65,5 +67,7 @@ private:
 	void select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, int i_tile_size);
 
 	void cancel();
+
+	bool b_cursor_updated;
 };
 #endif 

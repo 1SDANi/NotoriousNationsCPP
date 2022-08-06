@@ -1,5 +1,7 @@
 #include "Window.hpp"
 
+#include "Globals.hpp"
+
 Window::Window(const std::string& windowName) : wndw_window(sf::VideoMode(800, 600), windowName, sf::Style::Close | sf::Style::Resize | sf::Style::Titlebar)
 {
 	wndw_window.setVerticalSyncEnabled(true);
