@@ -13,17 +13,47 @@ Game::Game()
 	sprt_camera_cursor.setTexture(*p_txtr_cursor);
 
 	sprt_menu_cursor.setTexture(*p_txtr_cursor);
+
+	if (!font_font.loadFromFile(Globals::glob_get_globals().path_get_roaming_data_path().string() + "\\font.ttf"))
+	{
+		std::wcout << L"Failed to load font at " << Globals::glob_get_globals().path_get_roaming_data_path().c_str() << L"\\font.ttf\n";
+	}
+	else
+	{
+		text_text = sf::Text();
+		text_text.setFont(font_font);
+		text_text.setOutlineColor(sf::Color::White);
+		text_text.setFillColor(sf::Color::White);
+	}
 }
 
 void Game::update()
 {
 	Globals::glob_get_globals().update_controllers();
 
+	Globals::glob_get_globals().set_namebox_text_dom("");
+
 	std::shared_ptr<Menu> p_menu_menu = Globals::glob_get_globals().p_menu_get_menu();
 
 	p_menu_menu->update_submenu(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar");
 
 	Globals::glob_get_globals().update_window();
+
+	sf::FloatRect frct_iconbox_bounds = p_menu_menu->frct_get_iconbox_bounds(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar");
+
+	std::map<int, sf::FloatRect> m_i_frct_icon_bounds = p_menu_menu->m_i_frct_get_icon_bounds(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar");
+
+	if (m_i_frct_icon_bounds.size() > 0 && frct_iconbox_bounds.contains((sf::Vector2f)Globals::glob_get_globals().vc2i_get_mouse_position()))
+	{
+		for (int i = 0; i < m_i_frct_icon_bounds.size(); i++)
+		{
+			if (m_i_frct_icon_bounds[i].contains((sf::Vector2f)Globals::glob_get_globals().vc2i_get_mouse_position()))
+			{
+				Globals::glob_get_globals().set_namebox_text_dom("Set " + Globals::glob_get_globals().s_get_namebox_text_sub() + " to " + Globals::glob_get_globals().p_asmp_get_asset_maps()->
+					m_sslcv_get_soil_covers()[p_menu_menu->m_i_s_get_toolbar_sprite_names(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar")[i]].s_get_name());
+			}
+		}
+	}
 
 	if (Globals::glob_get_globals().b_is_has_focus())
 	{
@@ -38,8 +68,9 @@ void Game::update()
 
 	if (Globals::glob_get_globals().p_cmra_get_camera()->b_is_cursor_updated() && int2_camera_cursor.x >= 0 && int2_camera_cursor.y >= 0)
 	{
-
 		std::shared_ptr<Tile> p_tile_selected_tile = Globals::glob_get_globals().p_asmp_get_asset_maps()->p_map_get_map("Test Map 1")->p_tile_get_tile(int2_camera_cursor);
+
+		Globals::glob_get_globals().set_namebox_text_sub(p_tile_selected_tile->s_get_name());
 
 		p_menu_menu->populate_toolbar_soil_covers(p_tile_selected_tile->scvr_get_soil_cover().s_get_name());
 	}
@@ -79,6 +110,20 @@ void Game::draw()
 
 	Globals::glob_get_globals().draw(Globals::glob_get_globals().p_cmra_get_camera()->sprt_get_soilcovers_sprite());
 
+	sf::FloatRect frct_iconbox_bounds = p_menu_menu->frct_get_iconbox_bounds(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar");
+	sf::FloatRect frct_namebox_bounds = p_menu_menu->frct_get_namebox_bounds(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar");
+
+	sf::RectangleShape iconbox_fill(sf::Vector2f(frct_iconbox_bounds.width, frct_iconbox_bounds.height));
+	iconbox_fill.setFillColor(sf::Color::Black);
+	iconbox_fill.setPosition(frct_iconbox_bounds.left, frct_iconbox_bounds.top);
+
+	sf::RectangleShape namebox_fill(sf::Vector2f(frct_namebox_bounds.width, frct_namebox_bounds.height));
+	namebox_fill.setFillColor(sf::Color::Black);
+	namebox_fill.setPosition(frct_namebox_bounds.left, frct_namebox_bounds.top);
+
+	Globals::glob_get_globals().draw(iconbox_fill);
+	Globals::glob_get_globals().draw(namebox_fill);
+
 	if (Globals::glob_get_globals().p_cmra_get_camera()->int2_get_cursor_position().x >= 0 && Globals::glob_get_globals().p_cmra_get_camera()->int2_get_cursor_position().y >= 0)
 	{
 		Globals::glob_get_globals().draw(sprt_camera_cursor);
@@ -94,6 +139,14 @@ void Game::draw()
 	for (auto const& [i, s] : p_menu_menu->m_i_sprt_get_submenu_sprites(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar"))
 	{
 		Globals::glob_get_globals().draw(s);
+	}
+
+	if (p_menu_menu->i_get_nametext_height(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar") > 0)
+	{
+		text_text.setCharacterSize(p_menu_menu->i_get_nametext_height(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar"));
+		text_text.setString(Globals::glob_get_globals().s_get_namebox_text());
+		text_text.setPosition(p_menu_menu->vc2f_get_nametext_position(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar"));
+		Globals::glob_get_globals().draw(text_text);
 	}
 
 	Globals::glob_get_globals().end_draw();

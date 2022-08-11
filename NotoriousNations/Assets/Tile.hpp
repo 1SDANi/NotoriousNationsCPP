@@ -7,7 +7,7 @@
 #include "Int2.hpp"
 #include "SoilCover.hpp"
 
-class Tile : Asset
+class Tile : public Asset
 {
 public:
 	Tile();

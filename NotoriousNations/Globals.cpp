@@ -96,6 +96,35 @@ bool Globals::b_is_has_focus()
 	return b_has_focus;
 }
 
+std::string Globals::s_get_namebox_text()
+{
+	if (s_namebox_text_dom != "")
+	{
+		return s_get_namebox_text_dom();
+	}
+	return s_get_namebox_text_sub();
+}
+
+std::string Globals::s_get_namebox_text_dom()
+{
+	return s_namebox_text_dom;
+}
+
+std::string Globals::s_get_namebox_text_sub()
+{
+	return s_namebox_text_sub;
+}
+
+void Globals::set_namebox_text_dom(std::string s_text)
+{
+	s_namebox_text_dom = s_text;
+}
+
+void Globals::set_namebox_text_sub(std::string s_text)
+{
+	s_namebox_text_sub = s_text;
+}
+
 // static function
 // sets "path" to a pointer to a unicode string containing the path to the current user's Appdata/Roaming/NotoriousNations folder
 // returns true if "path" is successfully set

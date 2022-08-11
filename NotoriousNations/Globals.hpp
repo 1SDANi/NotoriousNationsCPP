@@ -55,6 +55,16 @@ public:
 
     bool b_is_has_focus();
 
+    std::string s_get_namebox_text();
+
+    std::string s_get_namebox_text_sub();
+
+    std::string s_get_namebox_text_dom();
+
+    void set_namebox_text_dom(std::string s_text);
+
+    void set_namebox_text_sub(std::string s_text);
+
     void edit_soil_cover(std::string s_name, int i);
 
     static constexpr uint32_t hash(std::string_view data) noexcept {
@@ -81,6 +91,10 @@ private:
         m_i_cntr_controllers[0] = Controller(path_get_roaming_data_path());
 
         b_has_focus = true;
+
+        s_namebox_text_dom = "";
+
+        s_namebox_text_sub = "";
     }
 
     Globals(Globals const&);
@@ -91,6 +105,10 @@ private:
     void operator=(Globals const&);
 
     std::filesystem::path generate_roaming_data_path();
+
+    std::string s_namebox_text_dom;
+
+    std::string s_namebox_text_sub;
 
     std::shared_ptr<AssetMaps> p_asmp_asset_maps;
 

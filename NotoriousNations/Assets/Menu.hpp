@@ -19,7 +19,9 @@ public:
 	Menu();
 	Menu(std::filesystem::path path_roaming_data_path);
 
-	sf::FloatRect frct_get_toolbar_bounds(Vector2 vec2_window_size, std::string s_name);
+	sf::FloatRect frct_get_iconbox_bounds(Vector2 vec2_window_size, std::string s_name);
+
+	sf::FloatRect frct_get_namebox_bounds(Vector2 vec2_window_size, std::string s_name);
 
 	std::map<int, sf::FloatRect> m_i_frct_get_icon_bounds(Vector2 vec2_window_size, std::string s_name);
 
@@ -30,6 +32,10 @@ public:
 	void populate_toolbar_soil_covers(std::string s_selected_soil_cover);
 
 	int i_get_cursor_position();
+
+	int i_get_nametext_height(Vector2 vec2_window_size, std::string s_name);
+
+	sf::Vector2f vc2f_get_nametext_position(Vector2 vec2_window_size, std::string s_name);
 
 	sf::Vector2f vc2f_get_icon_screen_coordinates(Vector2 vec2_window_size, std::string s_name, int i_index);
 

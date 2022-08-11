@@ -13,10 +13,15 @@ struct SubMenu {
 	std::string s_buffer;
 	std::string s_resolution;
 
-	std::string s_toolbar_x;
-	std::string s_toolbar_y;
-	std::string s_toolbar_w;
-	std::string s_toolbar_h;
+	std::string s_iconbox_x;
+	std::string s_iconbox_y;
+	std::string s_iconbox_w;
+	std::string s_iconbox_h;
+
+	std::string s_namebox_x;
+	std::string s_namebox_y;
+	std::string s_namebox_w;
+	std::string s_namebox_h;
 
 	std::map<int, MenuVariable> m_i_mnvb_menu_variables;
 	std::map<int, MenuSprite> m_i_mnsp_menu_sprites;

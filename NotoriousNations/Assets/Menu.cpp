@@ -14,12 +14,20 @@ Menu::Menu(std::filesystem::path path_roaming_data_path)
 	generate_menus(path_roaming_data_path);
 }
 
-sf::FloatRect Menu::frct_get_toolbar_bounds(Vector2 vec2_window_size, std::string s_name)
+sf::FloatRect Menu::frct_get_iconbox_bounds(Vector2 vec2_window_size, std::string s_name)
 {
-	return sf::FloatRect(get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_toolbar_x),
-						get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_toolbar_y),
-						get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_toolbar_w),
-						get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_toolbar_h));
+	return sf::FloatRect(get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_iconbox_x),
+						get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_iconbox_y),
+						get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_iconbox_w),
+						get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_iconbox_h));
+}
+
+sf::FloatRect Menu::frct_get_namebox_bounds(Vector2 vec2_window_size, std::string s_name)
+{
+	return sf::FloatRect(get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_namebox_x),
+		get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_namebox_y),
+		get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_namebox_w),
+		get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_namebox_h));
 }
 
 std::map<int, sf::FloatRect> Menu::m_i_frct_get_icon_bounds(Vector2 vec2_window_size, std::string s_name)
@@ -87,6 +95,18 @@ void Menu::populate_toolbar_soil_covers(std::string s_selected_soil_cover)
 int Menu::i_get_cursor_position()
 {
 	return i_cursor_position;
+}
+
+int Menu::i_get_nametext_height(Vector2 vec2_window_size, std::string s_name)
+{
+	float f_buffer = get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_buffer);
+	return (int)(get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_namebox_h) - f_buffer);
+}
+
+sf::Vector2f Menu::vc2f_get_nametext_position(Vector2 vec2_window_size, std::string s_name)
+{
+	float f_buffer = get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_buffer) / 2;
+	return sf::Vector2f(get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_namebox_x) + f_buffer, get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_namebox_y) + f_buffer / 2);
 }
 
 void Menu::update_variable(Vector2 vec2_window_size, std::string s_name, int i_index)
@@ -211,10 +231,15 @@ SubMenu Menu::sbmn_populate_submenu(nlohmann::json json_json, std::filesystem::p
 	sbmn_submenu.s_buffer = s_get_json(json_json, "s_buffer");
 	sbmn_submenu.s_resolution = s_get_json(json_json, "s_resolution");
 
-	sbmn_submenu.s_toolbar_x = s_get_json(json_json, "s_toolbar_x");
-	sbmn_submenu.s_toolbar_y = s_get_json(json_json, "s_toolbar_y");
-	sbmn_submenu.s_toolbar_w = s_get_json(json_json, "s_toolbar_w");
-	sbmn_submenu.s_toolbar_h = s_get_json(json_json, "s_toolbar_h");
+	sbmn_submenu.s_iconbox_x = s_get_json(json_json, "s_iconbox_x");
+	sbmn_submenu.s_iconbox_y = s_get_json(json_json, "s_iconbox_y");
+	sbmn_submenu.s_iconbox_w = s_get_json(json_json, "s_iconbox_w");
+	sbmn_submenu.s_iconbox_h = s_get_json(json_json, "s_iconbox_h");
+
+	sbmn_submenu.s_namebox_x = s_get_json(json_json, "s_namebox_x");
+	sbmn_submenu.s_namebox_y = s_get_json(json_json, "s_namebox_y");
+	sbmn_submenu.s_namebox_w = s_get_json(json_json, "s_namebox_w");
+	sbmn_submenu.s_namebox_h = s_get_json(json_json, "s_namebox_h");
 	
 	sbmn_submenu.m_i_mnvb_menu_variables = m_i_mnvb_populate_menu_variables(json_json, "dict_i_vrbl_variables", path_path, sbmn_submenu.s_name);
 
@@ -396,9 +421,10 @@ std::map<int, std::string> Menu::m_i_s_get_toolbar_sprite_names(Vector2 vec2_win
 
 sf::Vector2f Menu::vc2f_get_icon_screen_coordinates(Vector2 vec2_window_size, std::string s_name, int i_index)
 {
-	sf::Vector2f vc2f_top_left = sf::Vector2(get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_toolbar_x), get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_toolbar_y));
-
 	float f_buffer = get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_buffer);
+
+	sf::Vector2f vc2f_top_left = sf::Vector2(get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_iconbox_x) + f_buffer + f_buffer,
+									get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_iconbox_y) + f_buffer);
 
 	float f_scale = get_value(vec2_window_size, s_name, m_s_sbmn_submenus[s_name].s_scale);
 

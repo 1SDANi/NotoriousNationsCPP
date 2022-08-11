@@ -29,6 +29,10 @@ public:
 private:
 	sf::Clock clck_clock;
 
+	sf::Text text_text;
+
+	sf::Font font_font;
+
 	float f_delta_time;
 
 	float f_buffer_size = 8.0f;

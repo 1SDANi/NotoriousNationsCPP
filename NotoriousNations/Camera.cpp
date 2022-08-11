@@ -155,10 +155,13 @@ void Camera::select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, 
 
 	std::shared_ptr p_menu_menu = Globals::glob_get_globals().p_menu_get_menu();
 
-	sf::FloatRect frct_toolbar_bounds = p_menu_menu->frct_get_toolbar_bounds(vec2_window_size, "Toolbar");
+	sf::FloatRect frct_iconbox_bounds = p_menu_menu->frct_get_iconbox_bounds(vec2_window_size, "Toolbar");
+	sf::FloatRect frct_namebox_bounds = p_menu_menu->frct_get_namebox_bounds(vec2_window_size, "Toolbar");
 	std::map<int, sf::FloatRect> m_i_frct_icon_bounds = p_menu_menu->m_i_frct_get_icon_bounds(vec2_window_size, "Toolbar");
 
-	if (frct_toolbar_bounds.contains((sf::Vector2f)vc2i_mouse_position))
+	if (frct_namebox_bounds.contains((sf::Vector2f)vc2i_mouse_position)) return;
+
+	if (frct_iconbox_bounds.contains((sf::Vector2f)vc2i_mouse_position))
 	{
 		for (int i = 0; i < m_i_frct_icon_bounds.size(); i++)
 		{
