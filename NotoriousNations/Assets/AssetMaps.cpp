@@ -40,12 +40,43 @@ std::map<std::string, SoilCover> AssetMaps::m_sslcv_get_soil_covers() { return m
 
 int AssetMaps::i_get_tile_size() { return i_tile_size; }
 
+void AssetMaps::save_map(std::string s_in_name, std::string s_out_name, std::filesystem::path path_path)
+{
+	nlohmann::json json_json = {};
+
+	std::shared_ptr<Map> p_map_map = m_s_p_map_maps[s_in_name];
+
+	json_json["s_name"] = s_out_name;
+	json_json["s_shape"] = p_map_map->s_get_shape();
+	json_json["s_type"] = "Map";
+	json_json["i_x"] = p_map_map->int2_get_size().x;
+	json_json["i_y"] = p_map_map->int2_get_size().y;
+	
+	for (int x = 0; x < p_map_map->int2_get_size().x; x++)
+	{
+		for (int y = 0; y < p_map_map->int2_get_size().y; y++)
+		{
+			std::string s_coords = std::to_string(x) + "," + std::to_string(y);
+			
+			std::shared_ptr<Tile> p_tile_tile = p_map_map->p_tile_get_tile(Int2(x, y));
+
+			json_json["dict_vec2_tile_tiles"][s_coords]["s_name"] = p_tile_tile->s_get_name();
+			json_json["dict_vec2_tile_tiles"][s_coords]["s_type"] = "Tile";
+			json_json["dict_vec2_tile_tiles"][s_coords]["s_soil_cover"] = p_tile_tile->scvr_get_soil_cover().s_get_name();
+		}
+	}
+
+	std::ofstream ofst_file(path_path);
+	ofst_file << std::setw(4) << json_json;
+	ofst_file.close();
+}
+
 void AssetMaps::generate_maps()
 {
 	std::vector<std::filesystem::path>  v_path_matching_paths = FolderCrawler::b_crawl_folder(path_roaming_data_path.string() + "\\JSON\\Maps", { L".json" });
 	if (v_path_matching_paths.size() > 0)
 	{
-		Map map_iteration;
+		std::shared_ptr<Map> p_map_iteration;
 
 		nlohmann::json json_json;
 
@@ -55,14 +86,16 @@ void AssetMaps::generate_maps()
 
 			json_json = nlohmann::json::parse(ifst_ifstream);
 
-			map_iteration = map_populate_map(json_json, path_path);
+			p_map_iteration = p_map_populate_map(json_json, path_path);
 
-			m_s_p_map_maps[map_iteration.s_get_name()] = std::make_shared<Map>(map_iteration);
+			m_s_p_map_maps[p_map_iteration->s_get_name()] = p_map_iteration;
 		}
 	}
+
+	save_map("Test Map 1", "Test Map 1 Save", std::filesystem::path(path_roaming_data_path.string() + "\\JSON\\Maps\\testmap1save.json"));
 }
 
-Map AssetMaps::map_populate_map(nlohmann::json json_json, std::filesystem::path path_path)
+std::shared_ptr<Map> AssetMaps::p_map_populate_map(nlohmann::json json_json, std::filesystem::path path_path)
 {
 	Int2 int2_size = Int2(-1, -1);
 
@@ -95,7 +128,7 @@ Map AssetMaps::map_populate_map(nlohmann::json json_json, std::filesystem::path 
 		int2_size = Int2(json_json.at("i_x"), json_json.at("i_y"));
 	}
 
-	std::map<int, std::shared_ptr<Tile>> m_i_tile_tiles;
+	std::map<int, std::shared_ptr<Tile>> m_i_p_tile_tiles;
 
 	if (json_json.at("dict_vec2_tile_tiles").is_object())
 	{
@@ -125,15 +158,15 @@ Map AssetMaps::map_populate_map(nlohmann::json json_json, std::filesystem::path 
 				p_tile_tile = std::make_shared<Tile>(s_tile_name, Int2(i % int2_size.x, i / int2_size.x), m_s_slcv_soil_covers[s_soil_cover]);
 			}
 
-			m_i_tile_tiles[i] = p_tile_tile;
+			m_i_p_tile_tiles[i] = p_tile_tile;
 		}
 	}
 	
-	Map map_map = Map(s_map_name, m_i_tile_tiles, s_shape, int2_size.x);
+	std::shared_ptr<Map> p_map_map = std::make_shared<Map>(Map(s_map_name, m_i_p_tile_tiles, s_shape, int2_size.x));
 
-	map_map.update_soil_cover_texture(p_txtr_soil_cover_atlas, i_tile_size);
+	p_map_map->update_soil_cover_texture(p_txtr_soil_cover_atlas, i_tile_size);
 
-	return map_map;
+	return p_map_map;
 }
 
 void AssetMaps::generate_soil_cover_atlas()

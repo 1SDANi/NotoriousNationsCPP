@@ -17,6 +17,10 @@ public:
 	Map();
 	Map(std::string s_name, std::map<int, std::shared_ptr<Tile>> m_i_p_tile_tiles, std::string s_shape, int width);
 
+	std::string s_get_shape();
+
+	Int2 int2_get_size();
+
 	std::shared_ptr<Tile> p_tile_get_tile(Int2 int2_coordinates);
 
 	void set_soil_cover(Int2 int2_coordinates, SoilCover scvr_soil_cover, std::shared_ptr<sf::Texture> p_txtr_soil_cover_atlas, int i_tile_size);

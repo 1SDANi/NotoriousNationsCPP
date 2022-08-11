@@ -3,6 +3,7 @@
 Map::Map()
 {
 	int2_size = Int2(0, 0);
+	this->s_shape = "ERROR";
 	m_i_p_tile_tiles = std::map<int, std::shared_ptr<Tile>>();
 }
 
@@ -13,6 +14,16 @@ Map::Map(std::string s_name, std::map<int, std::shared_ptr<Tile>> m_i_p_tile_til
 	this->s_shape = s_shape;
 
 	this->m_i_p_tile_tiles = std::move(m_i_p_tile_tiles);
+}
+
+std::string Map::s_get_shape()
+{
+	return s_shape;
+}
+
+Int2 Map::int2_get_size()
+{
+	return int2_size;
 }
 
 std::shared_ptr<Tile> Map::p_tile_get_tile(Int2 int2_coordinates)

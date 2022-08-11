@@ -16,6 +16,7 @@
 #include <SFML/Graphics.hpp>
 #include <filesystem>
 #include <iostream>
+#include <fstream>
 
 class AssetMaps
 {
@@ -41,6 +42,8 @@ private:
 
 	void generate_soil_cover_atlas();
 
+	void save_map(std::string s_in_name, std::string s_out_name, std::filesystem::path path_path);
+
 	void generate_maps();
 
 	std::map<std::string, SoilCover> m_s_slcv_soil_covers;
@@ -55,7 +58,7 @@ private:
 
 	SoilCover slcv_prepopulate_soil_cover(SoilCover slcv_soil_cover, SoilCover slcv_default_soil_cover);
 
-	Map map_populate_map(nlohmann::json json_json, std::filesystem::path path_path);
+	std::shared_ptr<Map> p_map_populate_map(nlohmann::json json_json, std::filesystem::path path_path);
 
 	std::filesystem::path path_roaming_data_path;
 };
