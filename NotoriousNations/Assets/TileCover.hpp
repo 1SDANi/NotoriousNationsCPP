@@ -17,9 +17,9 @@ public:
 
 	std::map<std::string, std::string> m_s_s_get_all_texts();
 
-	bool b_set_text(std::string s_text, std::string s_value);
+	void set_text(std::string s_text, std::string s_value);
 
-	bool b_set_all_texts(std::map<std::string, std::string> m_s_s_yields);
+	void set_all_texts(std::map<std::string, std::string> m_s_s_yields);
 
 	bool b_has_flag(std::string s_flag);
 
@@ -27,9 +27,9 @@ public:
 
 	std::map<std::string, bool> m_s_b_get_all_flags();
 
-	bool b_set_flag(std::string s_flag, bool s_value);
+	void set_flag(std::string s_flag, bool s_value);
 
-	bool b_set_all_flags(std::map<std::string, bool> m_s_b_yields);
+	void set_all_flags(std::map<std::string, bool> m_s_b_yields);
 
 	Int2 int2_get_atlas_coords();
 

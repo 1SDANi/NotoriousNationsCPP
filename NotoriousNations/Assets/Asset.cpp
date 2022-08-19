@@ -15,8 +15,7 @@ std::string Asset::s_get_name()
 	return s_name;
 }
 
-bool Asset::b_set_name(std::string s_name)
+void Asset::set_name(std::string s_name)
 {
 	this->s_name = s_name;
-	return true;
 }

@@ -15,7 +15,7 @@ public:
 
 	std::string s_get_name();
 
-	bool b_set_name(std::string s_name);
+	void set_name(std::string s_name);
 
 private:
 	std::string s_name;

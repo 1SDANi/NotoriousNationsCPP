@@ -43,32 +43,24 @@ std::map<std::string, std::string> TileCover::m_s_s_get_all_texts()
 	return m_s_s_texts;
 }
 
-bool TileCover::b_set_text(std::string s_text, std::string s_value)
+void TileCover::set_text(std::string s_text, std::string s_value)
 {
-	if (b_has_yield(s_text))
+	if (b_has_text(s_text))
 	{
 		m_s_s_texts[s_text] = s_value;
-		return true;
 	}
 	else
 	{
-		return m_s_s_texts.emplace(s_text, s_value).second;
+		m_s_s_texts.emplace(s_text, s_value);
 	}
 }
 
-bool TileCover::b_set_all_texts(std::map<std::string, std::string> m_s_s_yields)
+void TileCover::set_all_texts(std::map<std::string, std::string> m_s_s_yields)
 {
 	for (std::pair<std::string, std::string> pair_s_s_pair : m_s_s_yields)
 	{
-		if (b_set_text(pair_s_s_pair.first, pair_s_s_pair.second))
-		{
-			continue;
-		}
-
-		return false;
+		set_text(pair_s_s_pair.first, pair_s_s_pair.second);
 	}
-
-	return true;
 }
 
 bool TileCover::b_has_flag(std::string s_flag)
@@ -93,29 +85,22 @@ std::map<std::string, bool> TileCover::m_s_b_get_all_flags()
 	return m_s_b_flags;
 }
 
-bool TileCover::b_set_flag(std::string s_flag, bool s_value)
+void TileCover::set_flag(std::string s_flag, bool s_value)
 {
-	if (b_has_yield(s_flag))
+	if (b_has_flag(s_flag))
 	{
-		return false;
+		m_s_b_flags[s_flag] = s_value;
 	}
 	else
 	{
-		return m_s_b_flags.emplace(s_flag, s_value).second;
+		m_s_b_flags.emplace(s_flag, s_value);
 	}
 }
 
-bool TileCover::b_set_all_flags(std::map<std::string, bool> m_s_b_yields)
+void TileCover::set_all_flags(std::map<std::string, bool> m_s_b_yields)
 {
 	for (std::pair<std::string, bool> pair_s_s_pair : m_s_b_yields)
 	{
-		if (b_set_flag(pair_s_s_pair.first, pair_s_s_pair.second))
-		{
-			continue;
-		}
-
-		return false;
+		set_flag(pair_s_s_pair.first, pair_s_s_pair.second);
 	}
-
-	return true;
 }
