@@ -151,11 +151,11 @@ void Game::draw()
 	sf::FloatRect frct_namebox_bounds = p_menu_menu->frct_get_namebox_bounds(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar");
 
 	sf::RectangleShape iconbox_fill(sf::Vector2f(frct_iconbox_bounds.width, frct_iconbox_bounds.height));
-	iconbox_fill.setFillColor(sf::Color::Black);
+	iconbox_fill.setFillColor(sf::Color(64, 64, 64, 255));
 	iconbox_fill.setPosition(frct_iconbox_bounds.left, frct_iconbox_bounds.top);
 
 	sf::RectangleShape namebox_fill(sf::Vector2f(frct_namebox_bounds.width, frct_namebox_bounds.height));
-	namebox_fill.setFillColor(sf::Color::Black);
+	namebox_fill.setFillColor(sf::Color(64, 64, 64, 255));
 	namebox_fill.setPosition(frct_namebox_bounds.left, frct_namebox_bounds.top);
 
 	Globals::glob_get_globals().draw(iconbox_fill);

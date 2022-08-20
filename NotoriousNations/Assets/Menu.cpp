@@ -4,12 +4,12 @@
 
 Menu::Menu()
 {
-	i_cursor_position = -1;
+	clear_toolbar();
 }
 
 Menu::Menu(std::filesystem::path path_roaming_data_path)
 {
-	i_cursor_position = -1;
+	clear_toolbar();
 
 	generate_menus(path_roaming_data_path);
 }
@@ -59,6 +59,7 @@ void Menu::clear_toolbar()
 {
 	m_i_sprt_toolbar_sprites = std::map<int, sf::Sprite>();
 	m_i_s_toolbar_sprite_names = std::map<int, std::string>();
+	i_cursor_position = -1;
 }
 
 void Menu::populate_toolbar_tile(Tile tile_selected_tile)
@@ -96,8 +97,6 @@ void Menu::populate_toolbar_soil_covers(std::string s_selected_soil_cover, std::
 
 	int i;
 
-	i_cursor_position = -1;
-
 	for (std::pair<std::string, AtlasYield> pair_pair : m_s_scvr_soil_covers)
 	{
 		Int2 int2_atlas_coords = pair_pair.second.int2_get_atlas_coords();
@@ -108,9 +107,9 @@ void Menu::populate_toolbar_soil_covers(std::string s_selected_soil_cover, std::
 
 		sprt_temp_sprite.setTexture(*p_txtr_atlas_texture);
 		sprt_temp_sprite.setTextureRect(sf::Rect(int2_atlas_coords.x * i_tile_size,
-										((int)(p_txtr_atlas_texture->getSize().y)) - i_tile_size - int2_atlas_coords.y * i_tile_size,
+										((int)(p_txtr_atlas_texture->getSize().y)) - int2_atlas_coords.y * i_tile_size,
 										i_tile_size,
-										i_tile_size));
+										-i_tile_size));
 
 		if (pair_pair.first == s_selected_soil_cover) { i_cursor_position = i; }
 
@@ -127,8 +126,6 @@ void Menu::populate_toolbar_units(std::string s_selected_soil_cover, std::map<st
 
 	int i = 0;
 
-	i_cursor_position = -1;
-
 	for (std::pair<std::string, Unit> pair_pair : m_s_unit_units)
 	{
 		Int2 int2_atlas_coords = pair_pair.second.untp_get_unit_type().int2_get_atlas_coords();
@@ -137,9 +134,9 @@ void Menu::populate_toolbar_units(std::string s_selected_soil_cover, std::map<st
 
 		sprt_temp_sprite.setTexture(*p_txtr_atlas_texture);
 		sprt_temp_sprite.setTextureRect(sf::Rect(int2_atlas_coords.x * i_tile_size,
-									   ((int)(p_txtr_atlas_texture->getSize().y)) - i_tile_size - int2_atlas_coords.y * i_tile_size,
-									   i_tile_size,
-									   i_tile_size));
+									    ((int)(p_txtr_atlas_texture->getSize().y)) - int2_atlas_coords.y * i_tile_size,
+									    i_tile_size,
+									   -i_tile_size));
 
 		if (pair_pair.first == s_selected_soil_cover) { i_cursor_position = i; }
 
