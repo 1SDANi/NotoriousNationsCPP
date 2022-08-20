@@ -25,6 +25,8 @@ Camera::Camera()
 
 	int2_cursor_position = Int2(-1, -1);
 
+	p_asst_selected_asset = nullptr;
+
 	b_cursor_updated = true;
 
 	vec3_position = Vector3(0, 0, 1);
@@ -37,6 +39,8 @@ Camera::Camera()
 Camera::Camera(std::filesystem::path path_roaming_data_path)
 {
 	int2_cursor_position = Int2(-1, -1);
+
+	p_asst_selected_asset = nullptr;
 
 	b_cursor_updated = true;
 
@@ -167,9 +171,33 @@ void Camera::select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, 
 		{
 			if (m_i_frct_icon_bounds[i].contains((sf::Vector2f)vc2i_mouse_position))
 			{
-				Globals::glob_get_globals().edit_soil_cover("Toolbar", i);
+				if (std::shared_ptr<Tile> p_tile_tile = std::dynamic_pointer_cast<Tile>(get_selected_asset()))
+				{
+					int i_garrison_index = p_tile_tile->p_grsn_get_garrison()->m_s_unit_get_units().size() > 0 ? 1 : -1;
 
-				b_cursor_updated = true;
+					if (i == 0)
+					{
+						p_asst_selected_asset = std::make_shared<SoilCover>(p_tile_tile->scvr_get_soil_cover());
+
+						b_cursor_updated = true;
+					}
+					else if (i == i_garrison_index)
+					{
+						p_asst_selected_asset = p_tile_tile->p_grsn_get_garrison();
+
+						b_cursor_updated = true;
+					}
+				}
+				else if (std::shared_ptr<SoilCover> p_tile_tile = std::dynamic_pointer_cast<SoilCover>(get_selected_asset()))
+				{
+					Globals::glob_get_globals().edit_soil_cover("Toolbar", i);
+
+					b_cursor_updated = true;
+				}
+				else if (std::shared_ptr<Garrison> p_grsn_garrison = std::dynamic_pointer_cast<Garrison>(get_selected_asset()))
+				{
+					
+				}
 			}
 		}
 	}
@@ -186,6 +214,8 @@ void Camera::select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, 
 
 			int2_cursor_position = int2_clicked_position;
 
+			p_asst_selected_asset = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position);
+
 			b_cursor_updated = true;
 		}
 	}
@@ -193,16 +223,29 @@ void Camera::select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, 
 
 void Camera::cancel()
 {
-	int2_cursor_position = Int2(-1, -1);
+	if (int2_cursor_position.x >= 0 && int2_cursor_position.y >= 0 && std::dynamic_pointer_cast<Tile>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()) == nullptr)
+	{
+		p_asst_selected_asset = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position);
 
-	b_cursor_updated = true;
+		b_cursor_updated = true;
+	}
+	else
+	{
+		int2_cursor_position = Int2(-1, -1);
+
+		p_asst_selected_asset = nullptr;
+
+		b_cursor_updated = true;
+	}
 }
 
 void Camera::late_update(int i_tile_size)
 {
 	sprt_soilcovers.setPosition(-vec3_position.x, vec3_position.y);
+	sprt_units.setPosition(-vec3_position.x, vec3_position.y);
 
 	sprt_soilcovers.setScale(1 + vec3_position.z, 1 + vec3_position.z);
+	sprt_units.setScale((1 + vec3_position.z) / 8, (1 + vec3_position.z) / 8);
 }
 
 void Camera::set_soilcovers(std::shared_ptr<sf::Texture> p_txtr_texture)
@@ -210,7 +253,22 @@ void Camera::set_soilcovers(std::shared_ptr<sf::Texture> p_txtr_texture)
 	sprt_soilcovers.setTexture(*p_txtr_texture);
 }
 
+void Camera::set_units(std::shared_ptr<sf::Texture> p_txtr_texture)
+{
+	sprt_units.setTexture(*p_txtr_texture);
+}
+
 sf::Sprite Camera::sprt_get_soilcovers_sprite()
 {
 	return sprt_soilcovers;
+}
+
+sf::Sprite Camera::sprt_get_units_sprite()
+{
+	return sprt_units;
+}
+
+std::shared_ptr<Asset> Camera::get_selected_asset()
+{
+	return p_asst_selected_asset;
 }

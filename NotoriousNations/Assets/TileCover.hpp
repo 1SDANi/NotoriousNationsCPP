@@ -2,10 +2,9 @@
 #ifndef TileCover_hpp
 #define TileCover_hpp
 
-#include "MultiYield.hpp"
-#include "Int2.hpp"
+#include "AtlasYield.hpp"
 
-class TileCover : public MultiYield
+class TileCover : public AtlasYield
 {
 public:
 	TileCover();
@@ -31,11 +30,7 @@ public:
 
 	void set_all_flags(std::map<std::string, bool> m_s_b_yields);
 
-	Int2 int2_get_atlas_coords();
-
 private:
-	Int2 int2_atlas_coords;
-
 	std::map<std::string, std::string> m_s_s_texts;
 
 	std::map<std::string, bool> m_s_b_flags;

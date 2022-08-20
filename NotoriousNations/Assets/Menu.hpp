@@ -4,6 +4,7 @@
 
 #include "SubMenu.hpp"
 #include "Vector2.hpp"
+#include "Tile.hpp"
 
 #include "../json.hpp"
 
@@ -11,6 +12,8 @@
 #include <vector>
 #include <filesystem>
 #include <SFML/Graphics.hpp>
+#include <iostream>
+#include <memory>
 
 class Globals;
 class Menu
@@ -29,7 +32,13 @@ public:
 
 	void clear_toolbar();
 
-	void populate_toolbar_soil_covers(std::string s_selected_soil_cover);
+	void populate_toolbar_soil_covers(std::string s_selected_soil_cover, std::map<std::string, SoilCover> m_s_t_map, std::shared_ptr<sf::Texture> p_txtr_atlas_texture);
+
+	void populate_toolbar_units(std::string s_selected_soil_cover, std::map<std::string, Unit> m_s_t_map, std::shared_ptr<sf::Texture> p_txtr_atlas_texture);
+
+	void populate_toolbar_tile(Tile tile_selected_tile);
+
+	void populate_orphan_icon(int i_index, std::string s_name);
 
 	int i_get_cursor_position();
 

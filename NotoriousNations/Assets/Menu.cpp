@@ -61,7 +61,34 @@ void Menu::clear_toolbar()
 	m_i_s_toolbar_sprite_names = std::map<int, std::string>();
 }
 
-void Menu::populate_toolbar_soil_covers(std::string s_selected_soil_cover)
+void Menu::populate_toolbar_tile(Tile tile_selected_tile)
+{
+	clear_toolbar();
+
+	int i_tile_size = Globals::glob_get_globals().p_asmp_get_asset_maps()->i_get_tile_size();
+
+	int i = 0;
+
+	Int2 int2_camera_cursor = Globals::glob_get_globals().p_cmra_get_camera()->int2_get_cursor_position();
+
+	populate_orphan_icon(i++, "terraform");
+	if (Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_camera_cursor)->p_grsn_get_garrison()->m_s_unit_get_units().size() > 0)
+	{
+		populate_orphan_icon(i++, "garrison");
+	}
+}
+
+void Menu::populate_orphan_icon(int i_index, std::string s_name)
+{
+	sf::Sprite sprt_temp_sprite = sf::Sprite();
+
+	sprt_temp_sprite.setTexture(*m_s_p_txtr_textures[s_name]);
+
+	m_i_sprt_toolbar_sprites.emplace(i_index, sprt_temp_sprite);
+	m_i_s_toolbar_sprite_names.emplace(i_index, s_name);
+}
+
+void Menu::populate_toolbar_soil_covers(std::string s_selected_soil_cover, std::map<std::string, SoilCover> m_s_scvr_soil_covers, std::shared_ptr<sf::Texture> p_txtr_atlas_texture)
 {
 	clear_toolbar();
 
@@ -71,24 +98,55 @@ void Menu::populate_toolbar_soil_covers(std::string s_selected_soil_cover)
 
 	i_cursor_position = -1;
 
-	for (std::pair<std::string, SoilCover> pair_pair : Globals::glob_get_globals().p_asmp_get_asset_maps()->m_sslcv_get_soil_covers())
+	for (std::pair<std::string, AtlasYield> pair_pair : m_s_scvr_soil_covers)
 	{
 		Int2 int2_atlas_coords = pair_pair.second.int2_get_atlas_coords();
 
-		i = int2_atlas_coords.x + int2_atlas_coords.y * Globals::glob_get_globals().p_asmp_get_asset_maps()->p_txtr_get_soil_cover_atlas()->getSize().x / i_tile_size;
+		i = int2_atlas_coords.x + int2_atlas_coords.y * p_txtr_atlas_texture->getSize().x / i_tile_size;
 
 		sf::Sprite sprt_temp_sprite = sf::Sprite();
 
-		sprt_temp_sprite.setTexture(*Globals::glob_get_globals().p_asmp_get_asset_maps()->p_txtr_get_soil_cover_atlas());
+		sprt_temp_sprite.setTexture(*p_txtr_atlas_texture);
 		sprt_temp_sprite.setTextureRect(sf::Rect(int2_atlas_coords.x * i_tile_size,
-			((int)Globals::glob_get_globals().p_asmp_get_asset_maps()->p_txtr_get_soil_cover_atlas()->getSize().y) - i_tile_size - int2_atlas_coords.y * i_tile_size,
-			i_tile_size,
-			i_tile_size));
+										((int)(p_txtr_atlas_texture->getSize().y)) - i_tile_size - int2_atlas_coords.y * i_tile_size,
+										i_tile_size,
+										i_tile_size));
 
 		if (pair_pair.first == s_selected_soil_cover) { i_cursor_position = i; }
 
 		m_i_sprt_toolbar_sprites.emplace(i, sprt_temp_sprite);
 		m_i_s_toolbar_sprite_names.emplace(i, pair_pair.second.s_get_name());
+	}
+}
+
+void Menu::populate_toolbar_units(std::string s_selected_soil_cover, std::map<std::string, Unit> m_s_unit_units, std::shared_ptr<sf::Texture> p_txtr_atlas_texture)
+{
+	clear_toolbar();
+
+	int i_tile_size = Globals::glob_get_globals().p_asmp_get_asset_maps()->i_get_tile_size();
+
+	int i = 0;
+
+	i_cursor_position = -1;
+
+	for (std::pair<std::string, Unit> pair_pair : m_s_unit_units)
+	{
+		Int2 int2_atlas_coords = pair_pair.second.untp_get_unit_type().int2_get_atlas_coords();
+
+		sf::Sprite sprt_temp_sprite = sf::Sprite();
+
+		sprt_temp_sprite.setTexture(*p_txtr_atlas_texture);
+		sprt_temp_sprite.setTextureRect(sf::Rect(int2_atlas_coords.x * i_tile_size,
+									   ((int)(p_txtr_atlas_texture->getSize().y)) - i_tile_size - int2_atlas_coords.y * i_tile_size,
+									   i_tile_size,
+									   i_tile_size));
+
+		if (pair_pair.first == s_selected_soil_cover) { i_cursor_position = i; }
+
+		m_i_sprt_toolbar_sprites.emplace(i, sprt_temp_sprite);
+		m_i_s_toolbar_sprite_names.emplace(i, std::to_string(pair_pair.second.i_get_id()));
+
+		i++;
 	}
 }
 
@@ -387,6 +445,60 @@ void Menu::generate_submenu_sprites(std::filesystem::path path_roaming_data_path
 		m_s_m_i_sprt_submenu_sprites.at(s_name).emplace(i_index, sf::Sprite());
 
 		m_s_m_i_sprt_submenu_sprites.at(s_name).at(i_index).setTexture(*m_s_p_txtr_textures.at(mnsp_menu_sprite.s_texture));
+	}
+
+	if (!m_s_p_txtr_textures.contains("garrison"))
+	{
+		sf::Texture txtr_temp_texture;
+
+		txtr_temp_texture.loadFromFile(path_roaming_data_path.string() + "\\JSON\\Menu\\textures\\Garrison.png");
+
+		m_s_p_txtr_textures.emplace("garrison", std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture)));
+	}
+
+	if (!m_s_p_txtr_textures.contains("discharge"))
+	{
+		sf::Texture txtr_temp_texture;
+
+		txtr_temp_texture.loadFromFile(path_roaming_data_path.string() + "\\JSON\\Menu\\textures\\Discharge.png");
+
+		m_s_p_txtr_textures.emplace("discharge", std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture)));
+	}
+
+	if (!m_s_p_txtr_textures.contains("mobilize"))
+	{
+		sf::Texture txtr_temp_texture;
+
+		txtr_temp_texture.loadFromFile(path_roaming_data_path.string() + "\\JSON\\Menu\\textures\\Mobilize.png");
+
+		m_s_p_txtr_textures.emplace("mobilize", std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture)));
+	}
+
+	if (!m_s_p_txtr_textures.contains("rename"))
+	{
+		sf::Texture txtr_temp_texture;
+
+		txtr_temp_texture.loadFromFile(path_roaming_data_path.string() + "\\JSON\\Menu\\textures\\Rename.png");
+
+		m_s_p_txtr_textures.emplace("rename", std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture)));
+	}
+
+	if (!m_s_p_txtr_textures.contains("terraform"))
+	{
+		sf::Texture txtr_temp_texture;
+
+		txtr_temp_texture.loadFromFile(path_roaming_data_path.string() + "\\JSON\\Menu\\textures\\Terraform.png");
+
+		m_s_p_txtr_textures.emplace("terraform", std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture)));
+	}
+
+	if (!m_s_p_txtr_textures.contains("soil_covers"))
+	{
+		sf::Texture txtr_temp_texture;
+
+		txtr_temp_texture.loadFromFile(path_roaming_data_path.string() + "\\JSON\\Menu\\textures\\SoilCovers.png");
+
+		m_s_p_txtr_textures.emplace("soil_covers", std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture)));
 	}
 }
 

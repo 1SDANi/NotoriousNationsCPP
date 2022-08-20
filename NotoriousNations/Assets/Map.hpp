@@ -27,7 +27,11 @@ public:
 
 	std::shared_ptr<sf::Texture> p_txtr_get_soil_cover_texture();
 
+	std::shared_ptr<sf::Texture> p_txtr_get_units_texture();
+
 	void update_soil_cover_texture(std::shared_ptr<sf::Texture> p_txtr_soil_cover_atlas, int i_tile_size);
+
+	void update_units_texture(std::shared_ptr<sf::Texture> p_txtr_unit_type_atlas, int i_tile_size);
 
 private:
 	Int2 int2_size;
@@ -35,6 +39,8 @@ private:
 	std::string s_shape;
 
 	std::shared_ptr<sf::Texture> p_txtr_soil_cover_texture;
+
+	std::shared_ptr<sf::Texture> p_txtr_units_texture;
 
 	std::map<int,std::shared_ptr<Tile>> m_i_p_tile_tiles;
 };

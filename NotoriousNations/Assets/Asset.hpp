@@ -13,9 +13,9 @@ public:
 	Asset();
 	Asset(std::string s_name);
 
-	std::string s_get_name();
+	virtual std::string s_get_name();
 
-	void set_name(std::string s_name);
+	virtual void set_name(std::string s_name);
 
 private:
 	std::string s_name;

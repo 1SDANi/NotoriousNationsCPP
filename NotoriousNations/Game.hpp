@@ -9,6 +9,7 @@
 #include "Assets/Menu.hpp"
 
 #include <iostream>
+#include <memory>
 
 class Game
 {

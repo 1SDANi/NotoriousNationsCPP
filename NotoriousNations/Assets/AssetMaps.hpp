@@ -40,7 +40,7 @@ void generate_default(std::shared_ptr<std::map<std::string, T>> p_m_s_t_map,
 
 template <typename T>
 std::shared_ptr<sf::Texture> generate_atlas(std::vector<std::filesystem::path>  v_path_matching_paths,
-											std::shared_ptr<std::map<std::string, T>> p_m_s_t_map,
+											std::shared_ptr<std::map<std::string, T>> p_m_s_p_t_map,
 											T(*generate)(nlohmann::json json_json, std::filesystem::path path_path, int i, int x, T t_default),
 											T(*populate)(T t_t, nlohmann::json json_json, std::filesystem::path path_path),
 											int i_tile_size);
@@ -64,7 +64,11 @@ public:
 
 	std::shared_ptr<sf::Texture> p_txtr_get_soil_cover_atlas();
 
-	std::map<std::string, SoilCover> m_sslcv_get_soil_covers();
+	std::shared_ptr<sf::Texture> p_txtr_get_unit_type_atlas();
+
+	std::map<std::string, SoilCover> m_s_slcv_get_soil_covers();
+
+	std::map<std::string, UnitType> m_s_untp_get_unit_types();
 
 private:
 	int i_tile_size = 32;
@@ -73,11 +77,13 @@ private:
 
 	void save_map(std::string s_in_name, std::string s_out_name, std::filesystem::path path_path);
 
+	Unit unit_populate_unit(nlohmann::json json_json, std::filesystem::path path_path);
+
 	std::shared_ptr<Map> p_map_populate_map(nlohmann::json json_json, std::filesystem::path path_path);
 
-	std::shared_ptr<std::map<std::string, UnitType>> p_m_s_untp_unit_types;
-
 	std::shared_ptr<std::map<std::string, SoilCover>> p_m_s_slcv_soil_covers;
+
+	std::shared_ptr<std::map<std::string, UnitType>> p_m_s_untp_unit_types;
 
 	std::map<std::string, std::shared_ptr<Map>> m_s_p_map_maps;
 

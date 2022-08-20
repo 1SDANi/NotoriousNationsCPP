@@ -49,8 +49,28 @@ void Game::update()
 		{
 			if (m_i_frct_icon_bounds[i].contains((sf::Vector2f)Globals::glob_get_globals().vc2i_get_mouse_position()))
 			{
-				Globals::glob_get_globals().set_namebox_text_dom("Set " + Globals::glob_get_globals().s_get_namebox_text_sub() + " to " + Globals::glob_get_globals().p_asmp_get_asset_maps()->
-					m_sslcv_get_soil_covers()[p_menu_menu->m_i_s_get_toolbar_sprite_names(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar")[i]].s_get_name());
+				if (std::shared_ptr<Tile> p_tile_tile = std::dynamic_pointer_cast<Tile>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
+				{
+					int i_garrison_index = p_tile_tile->p_grsn_get_garrison()->m_s_unit_get_units().size() > 0 ? 1 : -1;
+
+					if (i == 0)
+					{
+						Globals::glob_get_globals().set_namebox_text_dom("Terraform");
+					}
+					else if (i == i_garrison_index)
+					{
+						Globals::glob_get_globals().set_namebox_text_dom("Garrison");
+					}
+				}
+				else if (std::shared_ptr<SoilCover> p_scvr_soil_cover = std::dynamic_pointer_cast<SoilCover>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
+				{
+					Globals::glob_get_globals().set_namebox_text_dom("Set " + Globals::glob_get_globals().s_get_namebox_text_sub() + " to " + Globals::glob_get_globals().p_asmp_get_asset_maps()->
+						m_s_slcv_get_soil_covers()[p_menu_menu->m_i_s_get_toolbar_sprite_names(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar")[i]].s_get_name());
+				}
+				else if (std::shared_ptr<Garrison> p_grsn_garrison = std::dynamic_pointer_cast<Garrison>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
+				{
+					Globals::glob_get_globals().set_namebox_text_dom("Instruct " + p_grsn_garrison->m_s_unit_get_units().at(p_menu_menu->m_i_s_get_toolbar_sprite_names(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar")[i]).s_get_name());
+				}
 			}
 		}
 	}
@@ -68,11 +88,24 @@ void Game::update()
 
 	if (Globals::glob_get_globals().p_cmra_get_camera()->b_is_cursor_updated() && int2_camera_cursor.x >= 0 && int2_camera_cursor.y >= 0)
 	{
-		std::shared_ptr<Tile> p_tile_selected_tile = Globals::glob_get_globals().p_asmp_get_asset_maps()->p_map_get_map("Test Map 1")->p_tile_get_tile(int2_camera_cursor);
+		if (std::shared_ptr<Tile> p_tile_tile = std::dynamic_pointer_cast<Tile>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
+		{
+			Globals::glob_get_globals().p_menu_get_menu()->populate_toolbar_tile(*p_tile_tile);
+		}
+		else if (std::shared_ptr<SoilCover> p_scvr_soil_cover = std::dynamic_pointer_cast<SoilCover>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
+		{
+			Globals::glob_get_globals().set_namebox_text_sub(Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_camera_cursor)->s_get_name());
 
-		Globals::glob_get_globals().set_namebox_text_sub(p_tile_selected_tile->s_get_name());
-
-		p_menu_menu->populate_toolbar_soil_covers(p_tile_selected_tile->scvr_get_soil_cover().s_get_name());
+			p_menu_menu->populate_toolbar_soil_covers(Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_camera_cursor)->scvr_get_soil_cover().s_get_name(),
+													  Globals::glob_get_globals().p_asmp_get_asset_maps()->m_s_slcv_get_soil_covers(),
+													  Globals::glob_get_globals().p_asmp_get_asset_maps()->p_txtr_get_soil_cover_atlas());
+		}
+		else if (std::shared_ptr<Garrison> p_grsn_garrison = std::dynamic_pointer_cast<Garrison>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
+		{
+			p_menu_menu->populate_toolbar_units(Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_camera_cursor)->scvr_get_soil_cover().s_get_name(),
+												p_grsn_garrison->m_s_unit_get_units(),
+												Globals::glob_get_globals().p_asmp_get_asset_maps()->p_txtr_get_unit_type_atlas());
+		}
 	}
 }
 
@@ -97,7 +130,9 @@ void Game::late_update()
 							(vec3_position.y + (float)(int2_camera_cursor_position.y) * i_tile_size * sprt_camera_cursor.getScale().y));
 	sprt_menu_cursor.setPosition(vc2f_menu_cursor_position);
 
-	Globals::glob_get_globals().p_cmra_get_camera()->set_soilcovers(Globals::glob_get_globals().p_asmp_get_asset_maps()->p_map_get_map("Test Map 1")->p_txtr_get_soil_cover_texture());
+	Globals::glob_get_globals().p_cmra_get_camera()->set_soilcovers(Globals::glob_get_globals().p_map_get_current_map()->p_txtr_get_soil_cover_texture());
+
+	Globals::glob_get_globals().p_cmra_get_camera()->set_units(Globals::glob_get_globals().p_map_get_current_map()->p_txtr_get_units_texture());
 
 	Globals::glob_get_globals().p_cmra_get_camera()->late_update(i_tile_size);
 }
@@ -109,6 +144,8 @@ void Game::draw()
 	Globals::glob_get_globals().begin_draw();
 
 	Globals::glob_get_globals().draw(Globals::glob_get_globals().p_cmra_get_camera()->sprt_get_soilcovers_sprite());
+
+	Globals::glob_get_globals().draw(Globals::glob_get_globals().p_cmra_get_camera()->sprt_get_units_sprite());
 
 	sf::FloatRect frct_iconbox_bounds = p_menu_menu->frct_get_iconbox_bounds(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar");
 	sf::FloatRect frct_namebox_bounds = p_menu_menu->frct_get_namebox_bounds(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar");
@@ -133,7 +170,11 @@ void Game::draw()
 			Globals::glob_get_globals().draw(s);
 		}
 
-		Globals::glob_get_globals().draw(sprt_menu_cursor);
+		if (p_menu_menu->i_get_cursor_position() >= 0)
+		{
+			Globals::glob_get_globals().draw(sprt_menu_cursor);
+		}
+		
 	}
 
 	for (auto const& [i, s] : p_menu_menu->m_i_sprt_get_submenu_sprites(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar"))

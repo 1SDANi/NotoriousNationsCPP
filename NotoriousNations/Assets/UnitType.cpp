@@ -1,23 +1,21 @@
 #include "UnitType.hpp"
 
-UnitType::UnitType() : Asset()
+UnitType::UnitType() : AtlasYield()
 {
 	s_combat_role = "";
 	s_combat_range = "";
 
-	m_s_i_generic_values = std::map<std::string, int>();
 	m_s_m_s_i_specific_values = std::map<std::string, std::map<std::string, int>>();
-	v_s_training = std::vector<std::string>();
+	v_s_training = std::set<std::string>();
 }
 
-UnitType::UnitType (std::string s_name) : Asset(s_name)
+UnitType::UnitType(std::string s_name, Int2 int2_atlas_coords) : AtlasYield(s_name, int2_atlas_coords)
 {
 	s_combat_role = "";
 	s_combat_range = "";
 
-	m_s_i_generic_values = std::map<std::string, int>();
 	m_s_m_s_i_specific_values = std::map<std::string, std::map<std::string, int>>();
-	v_s_training = std::vector<std::string>();
+	v_s_training = std::set<std::string>();
 }
 
 std::string UnitType::s_get_combat_role()
@@ -40,11 +38,6 @@ void UnitType::set_combat_range(std::string s_range)
 	this->s_combat_range = s_combat_range;
 }
 
-std::map<std::string, int> UnitType::m_s_i_get_generic_values()
-{
-	return m_s_i_generic_values;
-}
-
 std::map<std::string, std::map<std::string, int>> UnitType::m_s_i_get_specific_values()
 {
 	return m_s_m_s_i_specific_values;
@@ -62,14 +55,9 @@ std::map<std::string, int> UnitType::m_s_m_s_i_get_specific_specific_values(std:
 	}
 }
 
-std::vector<std::string> UnitType::s_get_training()
+std::set<std::string> UnitType::s_get_training()
 {
 	return v_s_training;
-}
-
-bool UnitType::b_has_generic_value(std::string s_key)
-{
-	return m_s_i_generic_values.contains(s_key);
 }
 
 bool UnitType::b_has_specific_value(std::string s_key)
@@ -89,19 +77,7 @@ bool UnitType::b_has_specific_specific_value(std::string s_key, std::string s_sp
 
 bool UnitType::b_has_training(std::string s_key)
 {
-	return std::find(v_s_training.begin(), v_s_training.end(), s_key) != v_s_training.end();
-}
-
-int UnitType::i_get_generic_value(std::string s_key)
-{
-	if (b_has_generic_value(s_key))
-	{
-		return m_s_i_generic_values[s_key];
-	}
-	else
-	{
-		return -1;
-	}
+	return v_s_training.find(s_key) != v_s_training.end();
 }
 
 std::map<std::string, int> UnitType::m_s_i_get_specific_value(std::string s_key)
@@ -125,14 +101,6 @@ int UnitType::i_get_specific_specific_value(std::string s_key, std::string s_spe
 	else
 	{
 		return -1;
-	}
-}
-
-void UnitType::set_generic_value(std::string s_key, int i_value)
-{
-	if (b_has_generic_value(s_key))
-	{
-		m_s_i_generic_values[s_key] = i_value;
 	}
 }
 
@@ -164,15 +132,7 @@ void UnitType::add_training(std::string s_key)
 {
 	if (!b_has_training(s_key))
 	{
-		v_s_training.push_back(s_key);
-	}
-}
-
-void UnitType::set_all_generic_values(std::map<std::string, int> m_s_i_generic_values)
-{
-	for (std::pair<std::string, int> pair_s_i_pair : m_s_i_generic_values)
-	{
-		set_generic_value(pair_s_i_pair.first, pair_s_i_pair.second);
+		v_s_training.insert(s_key);
 	}
 }
 
@@ -180,14 +140,14 @@ void UnitType::set_all_specific_values(std::map<std::string, std::map<std::strin
 {
 	for (std::pair<std::string, std::map<std::string, int>> pair_s_m_s_i_pair : m_s_m_s_i_specific_values)
 	{
-		for (std::pair<std::string, int> pair_s_i_pair : m_s_m_s_i_specific_values[pair_s_m_s_i_pair.first])
+		for (std::pair<std::string, int> pair_s_i_pair : pair_s_m_s_i_pair.second)
 		{
-			set_generic_value(pair_s_i_pair.first, pair_s_i_pair.second);
+			set_specific_specific_value(pair_s_m_s_i_pair.first, pair_s_i_pair.first, pair_s_i_pair.second);
 		}
 	}
 }
 
-void UnitType::set_all_training(std::vector<std::string> v_s_training)
+void UnitType::set_all_training(std::set<std::string> v_s_training)
 {
 	for (std::string s_training : v_s_training)
 	{

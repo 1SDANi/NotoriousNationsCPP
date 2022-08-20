@@ -163,5 +163,15 @@ std::filesystem::path Globals::generate_roaming_data_path()
 
 void Globals::edit_soil_cover(std::string s_name, int i)
 {
-	p_asmp_asset_maps->set_soil_cover("Test Map 1", p_cmra_camera->int2_get_cursor_position(), p_asmp_asset_maps->m_sslcv_get_soil_covers()[p_menu_menu->m_i_s_get_toolbar_sprite_names(vec2_get_window_size(), "Toolbar")[i]]);
+	p_asmp_asset_maps->set_soil_cover(s_get_current_map(), p_cmra_camera->int2_get_cursor_position(), p_asmp_asset_maps->m_s_slcv_get_soil_covers()[p_menu_menu->m_i_s_get_toolbar_sprite_names(vec2_get_window_size(), "Toolbar")[i]]);
+}
+
+std::string Globals::s_get_current_map()
+{
+	return s_current_map;
+}
+
+std::shared_ptr<Map> Globals::p_map_get_current_map()
+{
+	return p_asmp_get_asset_maps()->p_map_get_map(s_get_current_map());
 }

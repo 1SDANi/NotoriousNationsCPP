@@ -67,6 +67,10 @@ public:
 
     void edit_soil_cover(std::string s_name, int i);
 
+    std::string s_get_current_map();
+
+    std::shared_ptr<Map> p_map_get_current_map();
+
     static constexpr uint32_t hash(std::string_view data) noexcept {
         uint32_t hash = 5385;
 
@@ -95,6 +99,8 @@ private:
         s_namebox_text_dom = "";
 
         s_namebox_text_sub = "";
+
+        s_current_map = "Test Map 1";
     }
 
     Globals(Globals const&);
@@ -109,6 +115,8 @@ private:
     std::string s_namebox_text_dom;
 
     std::string s_namebox_text_sub;
+
+    std::string s_current_map;
 
     std::shared_ptr<AssetMaps> p_asmp_asset_maps;
 

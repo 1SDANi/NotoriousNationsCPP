@@ -44,7 +44,11 @@ void AssetMaps::set_soil_cover(std::string s_map, Int2 int2_coordinates, SoilCov
 
 std::shared_ptr<sf::Texture> AssetMaps::p_txtr_get_soil_cover_atlas() { return p_txtr_soil_cover_atlas; }
 
-std::map<std::string, SoilCover> AssetMaps::m_sslcv_get_soil_covers() { return *p_m_s_slcv_soil_covers; }
+std::shared_ptr<sf::Texture> AssetMaps::p_txtr_get_unit_type_atlas() { return p_txtr_unit_type_atlas; }
+
+std::map<std::string, SoilCover> AssetMaps::m_s_slcv_get_soil_covers() { return *p_m_s_slcv_soil_covers; }
+
+std::map<std::string, UnitType> AssetMaps::m_s_untp_get_unit_types() { return *p_m_s_untp_unit_types; }
 
 int AssetMaps::i_get_tile_size() { return i_tile_size; }
 
@@ -99,8 +103,29 @@ void AssetMaps::generate_maps()
 			m_s_p_map_maps[p_map_iteration->s_get_name()] = p_map_iteration;
 		}
 	}
+}
 
-	save_map("Test Map 1", "Test Map 1 Save", std::filesystem::path(path_roaming_data_path.string() + "\\JSON\\Maps\\testmap1save.json"));
+Unit AssetMaps::unit_populate_unit(nlohmann::json json_json, std::filesystem::path path_path)
+{
+	Unit unit_return_unit = Unit();
+
+	if (json_json.at("s_type") != "Unit")
+	{
+		std::throw_with_nested(path_path.string() + "is not a Unit");
+	}
+
+	unit_return_unit.set_name(json_json.at("s_name"));
+	unit_return_unit.set_unit_type(p_m_s_untp_unit_types->at(json_json.at("s_unit_type")));
+
+	if (json_json.contains("a_s_training") && json_json.at("a_s_training").is_array())
+	{
+		for (const auto& item : json_json.at("a_s_training").items())
+		{
+			unit_return_unit.add_training(item.value());
+		}
+	}
+
+	return unit_return_unit;
 }
 
 std::shared_ptr<Map> AssetMaps::p_map_populate_map(nlohmann::json json_json, std::filesystem::path path_path)
@@ -164,6 +189,14 @@ std::shared_ptr<Map> AssetMaps::p_map_populate_map(nlohmann::json json_json, std
 				}
 
 				p_tile_tile = std::make_shared<Tile>(s_tile_name, Int2(i % int2_size.x, i / int2_size.x), p_m_s_slcv_soil_covers->at(s_soil_cover));
+
+				if (json_json.at("dict_vec2_tile_tiles").at(s_coords).contains("a_unit_units") && json_json.at("dict_vec2_tile_tiles").at(s_coords).at("a_unit_units").is_object())
+				{
+					for (const auto& item : json_json.at("dict_vec2_tile_tiles").at(s_coords).at("a_unit_units").items())
+					{
+						p_tile_tile->p_grsn_get_garrison()->add_unit(unit_populate_unit(item.value(), path_path));
+					}
+				}
 			}
 
 			m_i_p_tile_tiles[i] = p_tile_tile;
@@ -174,13 +207,15 @@ std::shared_ptr<Map> AssetMaps::p_map_populate_map(nlohmann::json json_json, std
 
 	p_map_map->update_soil_cover_texture(p_txtr_soil_cover_atlas, i_tile_size);
 
+	p_map_map->update_units_texture(p_txtr_unit_type_atlas, i_tile_size);
+
 	return p_map_map;
 }
 
 template <typename T>
 void generate_default(std::shared_ptr<std::map<std::string, T>> p_m_s_t_map,
-								 std::vector<std::filesystem::path> v_path_matching_paths,
-								 T (*populate)(T t_t, nlohmann::json json_json, std::filesystem::path path_path))
+					  std::vector<std::filesystem::path> v_path_matching_paths,
+					  T (*populate)(T t_t, nlohmann::json json_json, std::filesystem::path path_path))
 {
 	nlohmann::json json_json;
 
@@ -213,7 +248,7 @@ SoilCover slcv_generate_soil_cover(nlohmann::json json_json, std::filesystem::pa
 
 UnitType untp_generate_unit_type(nlohmann::json json_json, std::filesystem::path path_path, int i, int x, UnitType untp_default)
 {
-	UnitType untp_return = UnitType("default");
+	UnitType untp_return = UnitType("default", Int2(i % x, i / x));
 
 	untp_return = untp_prepopulate_unit_type(untp_return, untp_default);
 
@@ -303,7 +338,7 @@ UnitType untp_prepopulate_unit_type(UnitType untp_unit_type, UnitType untp_defau
 {
 	UnitType untp_return_unit_type = untp_unit_type;
 
-	untp_return_unit_type.set_all_generic_values(untp_default_unit_type.m_s_i_get_generic_values());
+	untp_return_unit_type.set_all_yields(untp_default_unit_type.m_s_i_get_all_yields());
 	untp_return_unit_type.set_all_specific_values(untp_default_unit_type.m_s_i_get_specific_values());
 	untp_return_unit_type.set_all_training(untp_default_unit_type.s_get_training());
 
@@ -359,21 +394,21 @@ UnitType untp_populate_unit_type(UnitType untp_unit_type, nlohmann::json json_js
 	{
 		if (item.value().is_number())
 		{
-			untp_return_unit_type.set_generic_value(item.key(), item.value());
+			untp_return_unit_type.set_yield(item.key(), item.value());
 		}
 
+		else if (item.value().is_array())
+		{
+			for (const auto& item2 : item.value().items())
+			{
+				untp_return_unit_type.add_training(item2.value());
+			}
+		}
 		else if (item.value().is_object())
 		{
 			for (const auto& item2 : item.value().items())
 			{
-				if (item2.value().is_string() && item.key() == "a_s_training")
-				{
-					untp_return_unit_type.add_training(item2.value());
-				}
-				else
-				{
-					untp_return_unit_type.set_specific_specific_value(item.key(), item2.key(), item2.value());
-				}
+				untp_return_unit_type.set_specific_specific_value(item.key(), item2.key(), item2.value());
 			}
 		}
 	}

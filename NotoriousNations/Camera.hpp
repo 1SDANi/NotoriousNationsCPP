@@ -4,6 +4,7 @@
 
 #include "Controller.hpp"
 
+#include "Assets/Asset.hpp"
 #include "Assets/Int2.hpp"
 #include "Assets/Vector2.hpp"
 #include "Assets/Vector3.hpp"
@@ -41,13 +42,19 @@ public:
 
 	void set_soilcovers(std::shared_ptr<sf::Texture> p_txtr_texture);
 
+	void set_units(std::shared_ptr<sf::Texture> p_txtr_texture);
+
 	sf::Sprite sprt_get_soilcovers_sprite();
+
+	sf::Sprite sprt_get_units_sprite();
 
 	Vector3 vec3_get_position();
 
+	bool b_is_cursor_updated();
+
 	Int2 int2_get_cursor_position();
 
-	bool b_is_cursor_updated();
+	std::shared_ptr<Asset> get_selected_asset();
 
 private:
 	Vector3 vec3_position;
@@ -60,13 +67,17 @@ private:
 
 	sf::Sprite sprt_soilcovers;
 
+	sf::Sprite sprt_units;
+
 	std::filesystem::path path_roaming_data_path;
 
-	Int2 int2_cursor_position;
+	std::shared_ptr<Asset> p_asst_selected_asset;
 
 	void select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, int i_tile_size);
 
 	void cancel();
+
+	Int2 int2_cursor_position;
 
 	bool b_cursor_updated;
 };

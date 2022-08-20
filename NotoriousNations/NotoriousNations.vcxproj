@@ -21,6 +21,8 @@
   <ItemGroup>
     <ClCompile Include="Assets\Asset.cpp" />
     <ClCompile Include="Assets\AssetMaps.cpp" />
+    <ClCompile Include="Assets\AtlasYield.cpp" />
+    <ClCompile Include="Assets\Garrison.cpp" />
     <ClCompile Include="Assets\Map.cpp" />
     <ClCompile Include="Assets\Menu.cpp" />
     <ClCompile Include="Assets\MultiYield.cpp" />
@@ -36,12 +38,15 @@
     <ClCompile Include="FolderCrawler.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Globals.cpp" />
+    <ClCompile Include="ID_tracker.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Assets\Asset.hpp" />
     <ClInclude Include="Assets\AssetMaps.hpp" />
+    <ClInclude Include="Assets\AtlasYield.hpp" />
+    <ClInclude Include="Assets\Garrison.hpp" />
     <ClInclude Include="Assets\Int2.hpp" />
     <ClInclude Include="Assets\Map.hpp" />
     <ClInclude Include="Assets\Menu.hpp" />
@@ -64,6 +69,7 @@
     <ClInclude Include="FolderCrawler.hpp" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="Globals.hpp" />
+    <ClInclude Include="ID_tracker.hpp" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="Window.hpp" />
   </ItemGroup>
