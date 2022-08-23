@@ -14,10 +14,6 @@ public:
 	MultiYield();
 	MultiYield(std::string s_name);
 
-	void add_yield(std::string s_name);
-
-	void add_yield(std::string s_name, int i_value);
-
 	void remove_yield(std::string s_name);
 
 	bool b_has_yield(std::string s_name);

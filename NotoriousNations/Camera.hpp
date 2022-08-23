@@ -8,6 +8,7 @@
 #include "Assets/Int2.hpp"
 #include "Assets/Vector2.hpp"
 #include "Assets/Vector3.hpp"
+#include "Assets/MenuMode.hpp"
 
 #include "json.hpp"
 

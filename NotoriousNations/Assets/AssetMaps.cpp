@@ -18,8 +18,6 @@ AssetMaps::AssetMaps(std::filesystem::path path_roaming_data_path)
 
 	p_txtr_unit_type_atlas = generate_atlas(FolderCrawler::b_crawl_folder(path_roaming_data_path.string() + "\\JSON\\UnitTypes", { L".json" }),
 											 p_m_s_untp_unit_types, untp_generate_unit_type, untp_populate_unit_type, i_tile_size);
-
-	generate_maps();
 }
 
 bool AssetMaps::b_has_map(std::string s_name)
@@ -107,15 +105,12 @@ void AssetMaps::generate_maps()
 
 Unit AssetMaps::unit_populate_unit(nlohmann::json json_json, std::filesystem::path path_path)
 {
-	Unit unit_return_unit = Unit();
+	Unit unit_return_unit = Unit(json_json.at("s_name"), p_m_s_untp_unit_types->at(json_json.at("s_unit_type")));
 
 	if (json_json.at("s_type") != "Unit")
 	{
 		std::throw_with_nested(path_path.string() + "is not a Unit");
 	}
-
-	unit_return_unit.set_name(json_json.at("s_name"));
-	unit_return_unit.set_unit_type(p_m_s_untp_unit_types->at(json_json.at("s_unit_type")));
 
 	if (json_json.contains("a_s_training") && json_json.at("a_s_training").is_array())
 	{
@@ -194,7 +189,7 @@ std::shared_ptr<Map> AssetMaps::p_map_populate_map(nlohmann::json json_json, std
 				{
 					for (const auto& item : json_json.at("dict_vec2_tile_tiles").at(s_coords).at("a_unit_units").items())
 					{
-						p_tile_tile->p_grsn_get_garrison()->add_unit(unit_populate_unit(item.value(), path_path));
+						p_tile_tile->p_grsn_get_garrison()->add_unit(std::make_shared<Unit>(unit_populate_unit(item.value(), path_path)));
 					}
 				}
 			}

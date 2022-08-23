@@ -34,7 +34,9 @@ public:
 
 	void populate_toolbar_soil_covers(std::string s_selected_soil_cover, std::map<std::string, SoilCover> m_s_t_map, std::shared_ptr<sf::Texture> p_txtr_atlas_texture);
 
-	void populate_toolbar_units(std::string s_selected_soil_cover, std::map<std::string, Unit> m_s_t_map, std::shared_ptr<sf::Texture> p_txtr_atlas_texture);
+	void populate_toolbar_units(std::map<std::string, std::shared_ptr<Unit>> m_s_t_map, std::shared_ptr<sf::Texture> p_txtr_atlas_texture);
+
+	void populate_toolbar_unit_actions(std::shared_ptr<Unit> s_p_unit_unit, int i_selected_option);
 
 	void populate_toolbar_tile(Tile tile_selected_tile);
 

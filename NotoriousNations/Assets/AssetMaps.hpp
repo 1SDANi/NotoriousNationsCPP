@@ -70,10 +70,10 @@ public:
 
 	std::map<std::string, UnitType> m_s_untp_get_unit_types();
 
+	void generate_maps();
+
 private:
 	int i_tile_size = 32;
-
-	void generate_maps();
 
 	void save_map(std::string s_in_name, std::string s_out_name, std::filesystem::path path_path);
 

@@ -10,19 +10,6 @@ MultiYield::MultiYield(std::string s_name) : Asset(s_name)
 	m_s_i_yields = std::map<std::string, int>();
 }
 
-void MultiYield::add_yield(std::string s_name)
-{
-	add_yield(s_name, 0);
-}
-
-void MultiYield::add_yield(std::string s_name, int i_value)
-{
-	if (!b_has_yield(s_name))
-	{
-		m_s_i_yields.emplace(s_name,i_value);
-	}
-}
-
 void MultiYield::remove_yield(std::string s_name)
 {
 	if (b_has_yield(s_name))

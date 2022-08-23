@@ -80,11 +80,11 @@ void Map::update_units_texture(std::shared_ptr<sf::Texture> p_txtr_unit_type_atl
 	{
 		i_unit_iteration = 0;
 
-		if (m_i_p_tile_tiles[i]->p_grsn_get_garrison()->m_s_unit_get_units().size() == 0) { continue; }
+		if (m_i_p_tile_tiles[i]->p_grsn_get_garrison()->m_s_p_unit_get_units().size() == 0) { continue; }
 
-		for (std::pair<std::string, Unit> pair_s_unit_pair : m_i_p_tile_tiles[i]->p_grsn_get_garrison()->m_s_unit_get_units())
+		for (std::pair<std::string, std::shared_ptr<Unit>> pair_s_unit_pair : m_i_p_tile_tiles[i]->p_grsn_get_garrison()->m_s_p_unit_get_units())
 		{
-			int2_atlas_coords = pair_s_unit_pair.second.untp_get_unit_type().int2_get_atlas_coords();
+			int2_atlas_coords = pair_s_unit_pair.second->untp_get_unit_type().int2_get_atlas_coords();
 			sprt_temp_sprite.setTextureRect(sf::Rect(int2_atlas_coords.x * i_tile_size, ((int)p_txtr_unit_type_atlas->getSize().y) - ((int2_atlas_coords.y + 1) * i_tile_size), i_tile_size, i_tile_size));
 			sprt_temp_sprite.setPosition(static_cast<float>((((i % int2_size.x) * 8) + (i_unit_iteration % 4)) * i_tile_size),
 										 static_cast<float>((((int2_size.y - ((i / int2_size.x) + 1)) * 8) + (3 - (i_unit_iteration / 4))) * i_tile_size));

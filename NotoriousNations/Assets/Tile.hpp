@@ -22,6 +22,10 @@ public:
 
 	std::shared_ptr<Garrison> p_grsn_get_garrison();
 
+	bool b_can_mobilize(std::shared_ptr<Unit> p_unit_unit, std::shared_ptr<Tile> p_tile_tile);
+
+	bool b_move_unit(std::shared_ptr<Unit> unit_unit, std::shared_ptr<Tile> p_tile_destination);
+
 private:
 	SoilCover scvr_soil_cover;
 

@@ -25,6 +25,7 @@
     <ClCompile Include="Assets\Garrison.cpp" />
     <ClCompile Include="Assets\Map.cpp" />
     <ClCompile Include="Assets\Menu.cpp" />
+    <ClCompile Include="Assets\MenuMode.cpp" />
     <ClCompile Include="Assets\MultiYield.cpp" />
     <ClCompile Include="Assets\SoilCover.cpp" />
     <ClCompile Include="Assets\Tile.cpp" />
@@ -51,6 +52,7 @@
     <ClInclude Include="Assets\Map.hpp" />
     <ClInclude Include="Assets\Menu.hpp" />
     <ClInclude Include="Assets\MenuCalculation.hpp" />
+    <ClInclude Include="Assets\MenuMode.hpp" />
     <ClInclude Include="Assets\MenuSprite.hpp" />
     <ClInclude Include="Assets\MenuVariable.hpp" />
     <ClInclude Include="Assets\MultiYield.hpp" />

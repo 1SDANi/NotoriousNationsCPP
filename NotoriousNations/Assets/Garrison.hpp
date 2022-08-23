@@ -10,17 +10,22 @@ public:
 	Garrison();
 	Garrison(std::string s_name);
 
-	bool b_has_unit(Unit unit_unit);
+	bool b_has_unit(std::shared_ptr<Unit> unit_unit);
 
-	std::map<std::string, Unit> m_s_unit_get_units();
+	bool b_has_unit(int i_id);
 
-	void add_unit(Unit unit_unit);
+	std::map<std::string, std::shared_ptr<Unit>> m_s_p_unit_get_units();
 
-	void remove_unit(Unit unit_unit);
+	std::shared_ptr<Unit> p_unit_get_unit(int i_id);
+
+	void add_unit(std::shared_ptr<Unit> unit_unit);
+
+	void remove_unit(std::shared_ptr<Unit> unit_unit);
+
+	bool b_move_unit(std::shared_ptr<Unit> unit_unit, std::shared_ptr<Garrison> p_grsn_destination);
 
 private:
-	std::map<std::string, Unit> m_s_unit_units;
-
+	std::map<std::string, std::shared_ptr<Unit>> m_s_p_unit_units;
 };
 
 #endif

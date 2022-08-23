@@ -173,7 +173,7 @@ void Camera::select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, 
 			{
 				if (std::shared_ptr<Tile> p_tile_tile = std::dynamic_pointer_cast<Tile>(get_selected_asset()))
 				{
-					int i_garrison_index = p_tile_tile->p_grsn_get_garrison()->m_s_unit_get_units().size() > 0 ? 1 : -1;
+					int i_garrison_index = p_tile_tile->p_grsn_get_garrison()->m_s_p_unit_get_units().size() > 0 ? 1 : -1;
 
 					if (i == 0)
 					{
@@ -196,7 +196,51 @@ void Camera::select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, 
 				}
 				else if (std::shared_ptr<Garrison> p_grsn_garrison = std::dynamic_pointer_cast<Garrison>(get_selected_asset()))
 				{
+					std::shared_ptr<Unit> p_unit_unit = p_grsn_garrison->p_unit_get_unit(std::stoi(Globals::glob_get_globals().p_menu_get_menu()->m_i_s_get_toolbar_sprite_names(vec2_window_size, "Toolbar").at(i)));
 					
+					p_asst_selected_asset = p_unit_unit;
+
+					b_cursor_updated = true;
+				}
+				else if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(get_selected_asset()))
+				{
+					int i_mobilize_index = p_unit_unit->i_get_mobility() > 0 ? 1 : -1;
+
+					if (i == 0)
+					{
+						std::shared_ptr<Garrison> p_grsn_garrison = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position)->p_grsn_get_garrison();
+
+						p_grsn_garrison->remove_unit(p_unit_unit);
+
+						p_asst_selected_asset = p_grsn_garrison;
+
+						b_cursor_updated = true;
+					}
+					else if (i == i_mobilize_index)
+					{
+						p_asst_selected_asset = std::make_shared<MenuMode>("mobilize", (int)MenuMode::MenuModes::MENU_MODE_MOBILIZE, p_unit_unit);
+
+						b_cursor_updated = true;
+					}
+				}
+				else if (std::shared_ptr<MenuMode> p_mnmd_menu_mode = std::dynamic_pointer_cast<MenuMode>(get_selected_asset()))
+				{
+					if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(p_mnmd_menu_mode->p_asst_get_operator()))
+					{
+						if (p_mnmd_menu_mode->i_get_mode() == (int)MenuMode::MenuModes::MENU_MODE_MOBILIZE)
+						{
+							if (i == 0)
+							{
+								std::shared_ptr<Garrison> p_grsn_garrison = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position)->p_grsn_get_garrison();
+
+								p_grsn_garrison->remove_unit(p_unit_unit);
+
+								p_asst_selected_asset = p_grsn_garrison;
+
+								b_cursor_updated = true;
+							}
+						}
+					}
 				}
 			}
 		}
@@ -212,6 +256,29 @@ void Camera::select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, 
 
 			Int2 int2_clicked_position = Int2((int)(relative_mouse_position.x /  (float)i_tile_size), (int)(relative_mouse_position.y / (float)i_tile_size));
 
+			if (std::shared_ptr<MenuMode> p_mnmd_menu_mode = std::dynamic_pointer_cast<MenuMode>(get_selected_asset()))
+			{
+				if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(p_mnmd_menu_mode->p_asst_get_operator()))
+				{
+					if (p_mnmd_menu_mode->i_get_mode() == (int)MenuMode::MenuModes::MENU_MODE_MOBILIZE)
+					{
+						std::shared_ptr<Tile> p_tile_selected = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position);
+						std::shared_ptr<Tile> p_tile_destination = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_clicked_position);
+
+						if (p_tile_selected->b_move_unit(p_unit_unit, p_tile_destination))
+						{
+							p_asst_selected_asset = p_unit_unit;
+
+							int2_cursor_position = int2_clicked_position;
+
+							b_cursor_updated = true;
+
+							return;
+						}
+					}
+				}
+			}
+
 			int2_cursor_position = int2_clicked_position;
 
 			p_asst_selected_asset = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position);
@@ -223,11 +290,41 @@ void Camera::select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, 
 
 void Camera::cancel()
 {
-	if (int2_cursor_position.x >= 0 && int2_cursor_position.y >= 0 && std::dynamic_pointer_cast<Tile>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()) == nullptr)
+	if (int2_cursor_position.x >= 0 && int2_cursor_position.y >= 0)
 	{
-		p_asst_selected_asset = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position);
+		if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
+		{
+			p_asst_selected_asset = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position)->p_grsn_get_garrison();
 
-		b_cursor_updated = true;
+			b_cursor_updated = true;
+		}
+		else if (std::dynamic_pointer_cast<Tile>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()) == nullptr)
+		{
+			p_asst_selected_asset = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position);
+
+			b_cursor_updated = true;
+		}
+		else if (std::shared_ptr<MenuMode> p_mnmd_menu_mode = std::dynamic_pointer_cast<MenuMode>(get_selected_asset()))
+		{
+			if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(p_mnmd_menu_mode->p_asst_get_operator()))
+			{
+				if (p_mnmd_menu_mode->i_get_mode() == (int)MenuMode::MenuModes::MENU_MODE_MOBILIZE)
+				{
+					p_asst_selected_asset = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position)->p_grsn_get_garrison();
+
+					b_cursor_updated = true;
+				}
+			}
+		}
+		else
+		{
+			int2_cursor_position = Int2(-1, -1);
+
+			p_asst_selected_asset = nullptr;
+
+			b_cursor_updated = true;
+		}
+
 	}
 	else
 	{

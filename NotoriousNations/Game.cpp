@@ -4,6 +4,8 @@ Game::Game()
 {
 	Globals::glob_get_globals();
 
+	Globals::glob_get_globals().p_asmp_get_asset_maps()->generate_maps();
+
 	f_delta_time = clck_clock.restart().asSeconds();
 
 	p_txtr_cursor = std::make_shared<sf::Texture>(sf::Texture());
@@ -43,6 +45,10 @@ void Game::update()
 
 	std::map<int, sf::FloatRect> m_i_frct_icon_bounds = p_menu_menu->m_i_frct_get_icon_bounds(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar");
 
+	sf::Sprite sprt_soilcovers = Globals::glob_get_globals().p_cmra_get_camera()->sprt_get_soilcovers_sprite();
+
+	sf::Vector2i vc2i_mouse_position = Globals::glob_get_globals().vc2i_get_mouse_position();
+
 	if (m_i_frct_icon_bounds.size() > 0 && frct_iconbox_bounds.contains((sf::Vector2f)Globals::glob_get_globals().vc2i_get_mouse_position()))
 	{
 		for (int i = 0; i < m_i_frct_icon_bounds.size(); i++)
@@ -51,7 +57,7 @@ void Game::update()
 			{
 				if (std::shared_ptr<Tile> p_tile_tile = std::dynamic_pointer_cast<Tile>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
 				{
-					int i_garrison_index = p_tile_tile->p_grsn_get_garrison()->m_s_unit_get_units().size() > 0 ? 1 : -1;
+					int i_garrison_index = p_tile_tile->p_grsn_get_garrison()->m_s_p_unit_get_units().size() > 0 ? 1 : -1;
 
 					if (i == 0)
 					{
@@ -69,9 +75,85 @@ void Game::update()
 				}
 				else if (std::shared_ptr<Garrison> p_grsn_garrison = std::dynamic_pointer_cast<Garrison>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
 				{
-					Globals::glob_get_globals().set_namebox_text_dom("Instruct " + p_grsn_garrison->m_s_unit_get_units().at(p_menu_menu->m_i_s_get_toolbar_sprite_names(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar")[i]).s_get_name());
+					Globals::glob_get_globals().set_namebox_text_dom("Instruct " + p_grsn_garrison->m_s_p_unit_get_units().at(p_menu_menu->m_i_s_get_toolbar_sprite_names(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar")[i])->s_get_name());
+				}
+				else if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
+				{
+					int i_mobilize_index = p_unit_unit->i_get_mobility() > 0 ? 1 : -1;
+
+					if (i == 0)
+					{
+						Globals::glob_get_globals().set_namebox_text_dom("Discharge " + p_unit_unit->s_get_name());
+					}
+					else if (i == i_mobilize_index)
+					{
+						std::string s_mobility_string = p_unit_unit->i_get_mobility() > 1 ? " moves " : " move ";
+
+						Globals::glob_get_globals().set_namebox_text_dom("Mobilize " + p_unit_unit->s_get_name() + " (" + std::to_string(p_unit_unit->i_get_mobility()) + s_mobility_string + "left)");
+					}
+				}
+				else if (std::shared_ptr<MenuMode> p_mnmd_menu_mode = std::dynamic_pointer_cast<MenuMode>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
+				{
+					if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(p_mnmd_menu_mode->p_asst_get_operator()))
+					{
+						if (p_mnmd_menu_mode->i_get_mode() == (int)MenuMode::MenuModes::MENU_MODE_MOBILIZE)
+						{
+							if (i == 0)
+							{
+								Globals::glob_get_globals().set_namebox_text_dom("Discharge " + p_unit_unit->s_get_name());
+							}
+						}
+					}
 				}
 			}
+		}
+	}
+	else if (Globals::glob_get_globals().p_cmra_get_camera()->sprt_get_soilcovers_sprite().getGlobalBounds().contains((sf::Vector2f)vc2i_mouse_position))
+	{
+		// don't handle hovering outside of the window
+		if (vc2i_mouse_position.x < 0 ||
+			vc2i_mouse_position.x > Globals::glob_get_globals().vec2_get_window_size().x ||
+			vc2i_mouse_position.y < 0 ||
+			vc2i_mouse_position.y > Globals::glob_get_globals().vec2_get_window_size().x)
+		{
+			return;
+		}
+
+		Vector2 relative_mouse_position = Vector2((vc2i_mouse_position.x - sprt_soilcovers.getGlobalBounds().left) / sprt_soilcovers.getScale().x,
+			((vc2i_mouse_position.y - sprt_soilcovers.getGlobalBounds().top) / sprt_soilcovers.getScale().y));
+
+		Vector2 vec2_soilcover_dimensions = Vector2(sprt_soilcovers.getTexture()->getSize().x / (float)Globals::glob_get_globals().p_asmp_get_asset_maps()->i_get_tile_size(),
+			sprt_soilcovers.getTexture()->getSize().y / (float)Globals::glob_get_globals().p_asmp_get_asset_maps()->i_get_tile_size());
+
+		Int2 int2_selected_position = Globals::glob_get_globals().p_cmra_get_camera()->int2_get_cursor_position();
+
+		Int2 int2_hover_position = Int2((int)(relative_mouse_position.x / (float)Globals::glob_get_globals().p_asmp_get_asset_maps()->i_get_tile_size()),
+			(int)(relative_mouse_position.y / (float)Globals::glob_get_globals().p_asmp_get_asset_maps()->i_get_tile_size()));
+
+		std::shared_ptr<Tile> p_tile_selected_tile = nullptr;
+
+		if (int2_selected_position.x > -1 && int2_selected_position.y > -1)
+		{
+			p_tile_selected_tile = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_selected_position);
+		}
+
+		std::shared_ptr<Tile> p_tile_hover_tile = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_hover_position);
+
+		if (std::shared_ptr<MenuMode> p_mnmd_menu_mode = std::dynamic_pointer_cast<MenuMode>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
+		{
+			if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(p_mnmd_menu_mode->p_asst_get_operator()))
+			{
+				if (p_mnmd_menu_mode->i_get_mode() == (int)MenuMode::MenuModes::MENU_MODE_MOBILIZE && p_tile_selected_tile != nullptr && p_tile_selected_tile->b_can_mobilize(p_unit_unit, p_tile_hover_tile))
+				{
+					std::string s_mobility_string = p_unit_unit->i_get_mobility() > 1 ? " moves " : " move ";
+
+					Globals::glob_get_globals().set_namebox_text_dom("Mobilize " + p_unit_unit->s_get_name() + " to " + p_tile_hover_tile->s_get_name() + " (" + std::to_string(p_unit_unit->i_get_mobility()) + s_mobility_string + "left)");
+				}
+			}
+		}
+		else
+		{
+			Globals::glob_get_globals().set_namebox_text_dom(Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_hover_position)->s_get_name());
 		}
 	}
 
@@ -88,23 +170,43 @@ void Game::update()
 
 	if (Globals::glob_get_globals().p_cmra_get_camera()->b_is_cursor_updated() && int2_camera_cursor.x >= 0 && int2_camera_cursor.y >= 0)
 	{
+		if (std::shared_ptr<MenuMode> p_mnmd_menu_mode = std::dynamic_pointer_cast<MenuMode>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
+		{
+			if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(p_mnmd_menu_mode->p_asst_get_operator()))
+			{
+				if (p_mnmd_menu_mode->i_get_mode() == (int)MenuMode::MenuModes::MENU_MODE_MOBILIZE)
+				{
+					std::string s_mobility_string = p_unit_unit->i_get_mobility() > 1 ? " moves " : " move ";
+
+					Globals::glob_get_globals().set_namebox_text_sub("Mobilize " + p_unit_unit->s_get_name() + " (" + std::to_string(p_unit_unit->i_get_mobility()) + s_mobility_string + "left)");
+
+					p_menu_menu->populate_toolbar_unit_actions(p_unit_unit, 1);
+				}
+			}
+		}
+		else
+		{
+			Globals::glob_get_globals().set_namebox_text_sub(Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_camera_cursor)->s_get_name());
+		}
+
 		if (std::shared_ptr<Tile> p_tile_tile = std::dynamic_pointer_cast<Tile>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
 		{
 			Globals::glob_get_globals().p_menu_get_menu()->populate_toolbar_tile(*p_tile_tile);
 		}
 		else if (std::shared_ptr<SoilCover> p_scvr_soil_cover = std::dynamic_pointer_cast<SoilCover>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
 		{
-			Globals::glob_get_globals().set_namebox_text_sub(Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_camera_cursor)->s_get_name());
-
 			p_menu_menu->populate_toolbar_soil_covers(Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_camera_cursor)->scvr_get_soil_cover().s_get_name(),
 													  Globals::glob_get_globals().p_asmp_get_asset_maps()->m_s_slcv_get_soil_covers(),
 													  Globals::glob_get_globals().p_asmp_get_asset_maps()->p_txtr_get_soil_cover_atlas());
 		}
 		else if (std::shared_ptr<Garrison> p_grsn_garrison = std::dynamic_pointer_cast<Garrison>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
 		{
-			p_menu_menu->populate_toolbar_units(Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_camera_cursor)->scvr_get_soil_cover().s_get_name(),
-												p_grsn_garrison->m_s_unit_get_units(),
+			p_menu_menu->populate_toolbar_units(p_grsn_garrison->m_s_p_unit_get_units(),
 												Globals::glob_get_globals().p_asmp_get_asset_maps()->p_txtr_get_unit_type_atlas());
+		}
+		else if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
+		{
+			p_menu_menu->populate_toolbar_unit_actions(p_unit_unit, 0);
 		}
 	}
 }

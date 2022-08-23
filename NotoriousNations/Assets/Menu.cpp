@@ -73,7 +73,8 @@ void Menu::populate_toolbar_tile(Tile tile_selected_tile)
 	Int2 int2_camera_cursor = Globals::glob_get_globals().p_cmra_get_camera()->int2_get_cursor_position();
 
 	populate_orphan_icon(i++, "terraform");
-	if (Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_camera_cursor)->p_grsn_get_garrison()->m_s_unit_get_units().size() > 0)
+
+	if (Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_camera_cursor)->p_grsn_get_garrison()->m_s_p_unit_get_units().size() > 0)
 	{
 		populate_orphan_icon(i++, "garrison");
 	}
@@ -118,7 +119,7 @@ void Menu::populate_toolbar_soil_covers(std::string s_selected_soil_cover, std::
 	}
 }
 
-void Menu::populate_toolbar_units(std::string s_selected_soil_cover, std::map<std::string, Unit> m_s_unit_units, std::shared_ptr<sf::Texture> p_txtr_atlas_texture)
+void Menu::populate_toolbar_units(std::map<std::string, std::shared_ptr<Unit>> m_s_p_unit_units, std::shared_ptr<sf::Texture> p_txtr_atlas_texture)
 {
 	clear_toolbar();
 
@@ -126,9 +127,9 @@ void Menu::populate_toolbar_units(std::string s_selected_soil_cover, std::map<st
 
 	int i = 0;
 
-	for (std::pair<std::string, Unit> pair_pair : m_s_unit_units)
+	for (std::pair<std::string, std::shared_ptr<Unit>> pair_pair : m_s_p_unit_units)
 	{
-		Int2 int2_atlas_coords = pair_pair.second.untp_get_unit_type().int2_get_atlas_coords();
+		Int2 int2_atlas_coords = pair_pair.second->untp_get_unit_type().int2_get_atlas_coords();
 
 		sf::Sprite sprt_temp_sprite = sf::Sprite();
 
@@ -138,12 +139,27 @@ void Menu::populate_toolbar_units(std::string s_selected_soil_cover, std::map<st
 									    i_tile_size,
 									   -i_tile_size));
 
-		if (pair_pair.first == s_selected_soil_cover) { i_cursor_position = i; }
-
 		m_i_sprt_toolbar_sprites.emplace(i, sprt_temp_sprite);
-		m_i_s_toolbar_sprite_names.emplace(i, std::to_string(pair_pair.second.i_get_id()));
+		m_i_s_toolbar_sprite_names.emplace(i, std::to_string(pair_pair.second->i_get_id()));
 
 		i++;
+	}
+}
+
+void Menu::populate_toolbar_unit_actions(std::shared_ptr<Unit> s_p_unit_unit, int i_selected_option)
+{
+	clear_toolbar();
+
+	int i_tile_size = Globals::glob_get_globals().p_asmp_get_asset_maps()->i_get_tile_size();
+
+	int i = 0;
+
+	populate_orphan_icon(i++, "discharge");
+
+	if (s_p_unit_unit->i_get_mobility() > 0)
+	{
+		if (i == i_selected_option) { i_cursor_position = i; }
+		populate_orphan_icon(i++, "mobilize");
 	}
 }
 
