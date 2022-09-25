@@ -105,7 +105,7 @@ void AssetMaps::generate_maps()
 
 Unit AssetMaps::unit_populate_unit(nlohmann::json json_json, std::filesystem::path path_path)
 {
-	Unit unit_return_unit = Unit(json_json.at("s_name"), p_m_s_untp_unit_types->at(json_json.at("s_unit_type")));
+	Unit unit_return_unit = Unit(json_json.at("s_name"), p_m_s_untp_unit_types->at(json_json.at("s_unit_type")), json_json.at("s_player"));
 
 	if (json_json.at("s_type") != "Unit")
 	{
@@ -131,10 +131,29 @@ std::shared_ptr<Map> AssetMaps::p_map_populate_map(nlohmann::json json_json, std
 	std::string s_map_name = "-1";
 	std::string s_coords = "-1";
 
-	std::string s_tile_name = "-1";
+	std::string s_name = "-1";
+	std::string s_adjective = "-1";
+	std::string s_player = "-1";
 	std::string s_soil_cover = "-1";
 
+	int s_red;
+	int s_green;
+	int s_blue;
+	int s_alpha;
+
+	int i_turn_player = 0;
+
+	bool b_invert_unit_gradient;
+
+	sf::Color colr_primary;
+	sf::Color colr_secondary;
+
+	std::shared_ptr<Player> p_plyr_player = std::make_shared<Player>();
 	std::shared_ptr<Tile> p_tile_tile = std::make_shared<Tile>();
+
+	std::map<std::string, std::shared_ptr<Player>> m_s_p_plyr_players;
+	std::map<int, std::shared_ptr<Tile>> m_i_p_tile_tiles;
+	std::map<int, std::string> m_i_s_turn_order;
 
 	if (json_json.at("s_type") != "Map")
 	{
@@ -156,7 +175,58 @@ std::shared_ptr<Map> AssetMaps::p_map_populate_map(nlohmann::json json_json, std
 		int2_size = Int2(json_json.at("i_x"), json_json.at("i_y"));
 	}
 
-	std::map<int, std::shared_ptr<Tile>> m_i_p_tile_tiles;
+	if (json_json.at("i_turn_player").is_number())
+	{
+		i_turn_player = json_json.at("i_turn_player");
+	}
+
+	if (json_json.at("dict_i_s_turn_order").is_object())
+	{
+		for (const auto& item : json_json.at("dict_i_s_turn_order").items())
+		{
+			std::wcout << std::to_wstring(std::stoi(item.key())) << L", " << ((std::string)item.value()).c_str() << "\n";
+			m_i_s_turn_order.emplace(std::stoi(item.key()), item.value());
+		}
+	}
+
+	if (json_json.at("dict_i_plyr_players").is_object())
+	{
+		for (const auto& item : json_json.at("dict_i_plyr_players").items())
+		{
+			s_name = item.value().at("s_name");
+			s_adjective = item.value().at("s_adjective");
+			b_invert_unit_gradient = item.value().at("b_invert_unit_gradient");
+
+			s_red = item.value().at("colr_primary").at("s_red");
+			s_blue = item.value().at("colr_primary").at("s_blue");
+			s_green = item.value().at("colr_primary").at("s_green");
+			s_alpha = item.value().at("colr_primary").at("s_alpha");
+
+			colr_primary = sf::Color(s_red, s_green, s_blue, s_alpha);
+
+			s_red = item.value().at("colr_secondary").at("s_red");
+			s_blue = item.value().at("colr_secondary").at("s_blue");
+			s_green = item.value().at("colr_secondary").at("s_green");
+			s_alpha = item.value().at("colr_secondary").at("s_alpha");
+
+			colr_secondary = sf::Color(s_red, s_green, s_blue, s_alpha);
+
+			p_plyr_player = std::make_shared<Player>(s_name, Int2(-1, -1), s_adjective, colr_primary, colr_secondary, b_invert_unit_gradient);
+
+			if (item.value().at("dict_s_wrst_war_states").is_object())
+			{
+				for (const auto& item2 : item.value().at("dict_s_wrst_war_states").items())
+				{
+					if (item2.value() == "war_state_war")
+					{
+						p_plyr_player->set_war_state(item2.key(), Player::WarStates::WAR_STATE_WAR);
+					}
+				}
+			}
+
+			m_s_p_plyr_players.emplace(s_name, p_plyr_player);
+		}
+	}
 
 	if (json_json.at("dict_vec2_tile_tiles").is_object())
 	{
@@ -173,7 +243,12 @@ std::shared_ptr<Map> AssetMaps::p_map_populate_map(nlohmann::json json_json, std
 
 				if (json_json.at("dict_vec2_tile_tiles").at(s_coords).at("s_name").is_string())
 				{
-					s_tile_name = json_json.at("dict_vec2_tile_tiles").at(s_coords).at("s_name");
+					s_name = json_json.at("dict_vec2_tile_tiles").at(s_coords).at("s_name");
+				}
+
+				if (json_json.at("dict_vec2_tile_tiles").at(s_coords).at("s_player").is_string())
+				{
+					s_player = json_json.at("dict_vec2_tile_tiles").at(s_coords).at("s_player");
 				}
 
 				if (json_json.at("dict_vec2_tile_tiles").at(s_coords).at("s_soil_cover").is_string())
@@ -183,13 +258,15 @@ std::shared_ptr<Map> AssetMaps::p_map_populate_map(nlohmann::json json_json, std
 					std::wcout << L"loaded " << s_soil_cover.c_str() << " at " << s_coords.c_str() << L"\n";
 				}
 
-				p_tile_tile = std::make_shared<Tile>(s_tile_name, Int2(i % int2_size.x, i / int2_size.x), p_m_s_slcv_soil_covers->at(s_soil_cover));
+				p_tile_tile = std::make_shared<Tile>(s_name, Int2(i % int2_size.x, i / int2_size.x), p_m_s_slcv_soil_covers->at(s_soil_cover), s_player);
 
 				if (json_json.at("dict_vec2_tile_tiles").at(s_coords).contains("a_unit_units") && json_json.at("dict_vec2_tile_tiles").at(s_coords).at("a_unit_units").is_object())
 				{
 					for (const auto& item : json_json.at("dict_vec2_tile_tiles").at(s_coords).at("a_unit_units").items())
 					{
-						p_tile_tile->p_grsn_get_garrison()->add_unit(std::make_shared<Unit>(unit_populate_unit(item.value(), path_path)));
+						std::shared_ptr<Unit> p_unit_unit = std::make_shared<Unit>(unit_populate_unit(item.value(), path_path));
+						
+						p_tile_tile->p_grsn_get_garrison(p_unit_unit->s_get_player(), m_s_p_plyr_players[p_unit_unit->s_get_player()]->s_get_adjective())->add_unit(p_unit_unit, false);
 					}
 				}
 			}
@@ -198,11 +275,9 @@ std::shared_ptr<Map> AssetMaps::p_map_populate_map(nlohmann::json json_json, std
 		}
 	}
 	
-	std::shared_ptr<Map> p_map_map = std::make_shared<Map>(Map(s_map_name, m_i_p_tile_tiles, s_shape, int2_size.x));
+	std::shared_ptr<Map> p_map_map = std::make_shared<Map>(Map(s_map_name, m_i_p_tile_tiles, m_s_p_plyr_players, m_i_s_turn_order, i_turn_player, s_shape, int2_size.x));
 
 	p_map_map->update_soil_cover_texture(p_txtr_soil_cover_atlas, i_tile_size);
-
-	p_map_map->update_units_texture(p_txtr_unit_type_atlas, i_tile_size);
 
 	return p_map_map;
 }

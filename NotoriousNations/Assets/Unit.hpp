@@ -13,7 +13,7 @@ class Unit : public Asset
 public:
 	Unit();
 
-	Unit(std::string s_name, UnitType untp_unit_type);
+	Unit(std::string s_name, UnitType untp_unit_type, std::string s_player);
 
 	UnitType untp_get_unit_type();
 
@@ -22,6 +22,10 @@ public:
 	void add_training(std::string s_training);
 
 	std::set<std::string> s_get_training();
+
+	std::string s_get_player();
+
+	void set_player(std::string s_player);
 
 	int i_get_mobility();
 
@@ -39,6 +43,8 @@ public:
 
 private:
 	UnitType untp_unit_type;
+
+	std::string s_player;
 
 	int i_id;
 

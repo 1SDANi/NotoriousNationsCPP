@@ -4,14 +4,18 @@ Unit::Unit() : Asset()
 {
 	set_s_training = std::set<std::string>();
 
+	std::string s_player = "ERROR_NO_PLAYER";
+
 	i_id = ID_tracker::idtr_get_id_tracker().get_new_id();
 
 	refresh_mobility();
 }
 
-Unit::Unit(std::string s_name, UnitType untp_unit_type) : Asset(s_name)
+Unit::Unit(std::string s_name, UnitType untp_unit_type, std::string s_player) : Asset(s_name)
 {
 	this->untp_unit_type = untp_unit_type;
+
+	this->s_player = s_player;
 
 	i_id = ID_tracker::idtr_get_id_tracker().get_new_id();
 
@@ -26,6 +30,16 @@ UnitType Unit::untp_get_unit_type()
 void Unit::set_unit_type(UnitType untp_unit_type)
 {
 	this->untp_unit_type = untp_unit_type;
+}
+
+std::string Unit::s_get_player()
+{
+	return s_player;
+}
+
+void Unit::set_player(std::string s_player)
+{
+	this->s_player = s_player;
 }
 
 int Unit::i_get_mobility()

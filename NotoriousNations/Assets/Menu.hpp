@@ -5,13 +5,13 @@
 #include "SubMenu.hpp"
 #include "Vector2.hpp"
 #include "Tile.hpp"
+#include "GradientSprite.hpp"
 
 #include "../json.hpp"
 
 #include <cstdlib>
 #include <vector>
 #include <filesystem>
-#include <SFML/Graphics.hpp>
 #include <iostream>
 #include <memory>
 
@@ -40,7 +40,7 @@ public:
 
 	void populate_toolbar_tile(Tile tile_selected_tile);
 
-	void populate_orphan_icon(int i_index, std::string s_name);
+	void populate_orphan_icon(int i_index, std::string s_name, sf::Color colr_primary, sf::Color colr_secondary, bool b_invert_gradient);
 
 	int i_get_cursor_position();
 
@@ -52,9 +52,9 @@ public:
 
 	float f_get_icon_scale(Vector2 vec2_window_size, std::string s_name);
 
-	std::map<int, sf::Sprite> m_i_sprt_get_submenu_sprites(Vector2 vec2_window_size, std::string s_name);
+	std::map<int, GradientSprite> m_i_gtsp_get_submenu_sprites(Vector2 vec2_window_size, std::string s_name);
 
-	std::map<int, sf::Sprite> m_i_sprt_get_toolbar_sprites(Vector2 vec2_window_size, std::string s_name);
+	std::map<int, GradientSprite> m_i_gtsp_get_toolbar_sprites(Vector2 vec2_window_size, std::string s_name);
 
 	std::map<int, std::string> m_i_s_get_toolbar_sprite_names(Vector2 vec2_window_size, std::string s_name);
 
@@ -68,6 +68,8 @@ private:
 	SubMenu sbmn_populate_submenu(nlohmann::json json_json, std::filesystem::path path_path);
 
 	std::string s_get_json(nlohmann::json json_json, std::string key);
+
+	bool b_get_json(nlohmann::json json_json, std::string key);
 
 	void update_variable(Vector2 vec2_window_size, std::string s_name, int i_index);
 
@@ -87,9 +89,9 @@ private:
 
 	std::map<std::string, std::shared_ptr<sf::Texture>> m_s_p_txtr_textures;
 
-	std::map<std::string, std::map<int, sf::Sprite>> m_s_m_i_sprt_submenu_sprites;
+	std::map<std::string, std::map<int, GradientSprite>> m_s_m_i_gtsp_submenu_sprites;
 
-	std::map<int, sf::Sprite> m_i_sprt_toolbar_sprites;
+	std::map<int, GradientSprite> m_i_gtsp_toolbar_sprites;
 
 	std::map<int, std::string> m_i_s_toolbar_sprite_names;
 };

@@ -14,6 +14,7 @@ public:
 	void update();
 	void begin_draw();
 	void draw(const sf::Drawable& drawable);
+	void draw(const sf::Drawable& drawable, std::shared_ptr<sf::Shader> p_shdr_shader);
 	void end_draw();
 
 	bool b_is_open() const;

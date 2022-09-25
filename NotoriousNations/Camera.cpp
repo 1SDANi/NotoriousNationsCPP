@@ -2,22 +2,22 @@
 
 #include "Globals.hpp"
 
-const std::map<int, std::string> Camera::m_i_s_output_type_strings
+const std::map<Camera::CameraOutput, std::string> Camera::m_cotp_s_output_type_strings
 {
-	{ (int)CameraOutput::CAMERA_OUTPUT_VERTICAL, "Vertical" },
-	{ (int)CameraOutput::CAMERA_OUTPUT_HORIZONTAL, "Horizontal" },
-	{ (int)CameraOutput::CAMERA_OUTPUT_ZOOM, "Zoom" },
-	{ (int)CameraOutput::CAMERA_OUTPUT_SELECT, "Select" },
-	{ (int)CameraOutput::CAMERA_OUTPUT_CANCEL, "Cancel" }
+	{ CameraOutput::CAMERA_OUTPUT_VERTICAL, "Vertical" },
+	{ CameraOutput::CAMERA_OUTPUT_HORIZONTAL, "Horizontal" },
+	{ CameraOutput::CAMERA_OUTPUT_ZOOM, "Zoom" },
+	{ CameraOutput::CAMERA_OUTPUT_SELECT, "Select" },
+	{ CameraOutput::CAMERA_OUTPUT_CANCEL, "Cancel" }
 };
 
-const std::map<std::string, int> Camera::m_s_i_output_type_strings
+const std::map<std::string, Camera::CameraOutput> Camera::m_s_cotp_output_type_strings
 {
-	{ "Vertical", (int)CameraOutput::CAMERA_OUTPUT_VERTICAL},
-	{ "Horizontal", (int)CameraOutput::CAMERA_OUTPUT_HORIZONTAL },
-	{ "Zoom", (int)CameraOutput::CAMERA_OUTPUT_ZOOM },
-	{ "Select", (int)CameraOutput::CAMERA_OUTPUT_SELECT },
-	{ "Cancel", (int)CameraOutput::CAMERA_OUTPUT_CANCEL }
+	{ "Vertical", CameraOutput::CAMERA_OUTPUT_VERTICAL},
+	{ "Horizontal", CameraOutput::CAMERA_OUTPUT_HORIZONTAL },
+	{ "Zoom", CameraOutput::CAMERA_OUTPUT_ZOOM },
+	{ "Select", CameraOutput::CAMERA_OUTPUT_SELECT },
+	{ "Cancel", CameraOutput::CAMERA_OUTPUT_CANCEL }
 };
 
 Camera::Camera()
@@ -67,7 +67,7 @@ Camera::Camera(std::filesystem::path path_roaming_data_path)
 
 		for (auto& [name, key] : json_json.at(Controller::m_i_s_input_type_strings.at(i)).items())
 		{
-			m_i_m_s_i_outputs[i][name] = m_s_i_output_type_strings.at(key.at("output"));
+			m_i_m_s_i_outputs[i][name] = (int)m_s_cotp_output_type_strings.at(key.at("output"));
 			m_i_m_s_f_sensitivities[i][name] = key.at("sensitivity");
 		}
 	}
@@ -173,7 +173,24 @@ void Camera::select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, 
 			{
 				if (std::shared_ptr<Tile> p_tile_tile = std::dynamic_pointer_cast<Tile>(get_selected_asset()))
 				{
-					int i_garrison_index = p_tile_tile->p_grsn_get_garrison()->m_s_p_unit_get_units().size() > 0 ? 1 : -1;
+					std::map<int, std::string> m_i_s_garrison_indices = std::map<int, std::string>();
+
+					int i_index = 1;
+
+					if (p_tile_tile->p_grsn_get_garrison(Globals::glob_get_globals().plyr_get_turn_player()->s_get_name())->m_s_p_unit_get_units().size() > 0)
+					{
+						m_i_s_garrison_indices[i_index++] = Globals::glob_get_globals().plyr_get_turn_player()->s_get_name();
+					}
+
+					for (int j = 0; j < Globals::glob_get_globals().p_map_get_current_map()->m_i_s_get_turn_order().size(); j++)
+					{
+						std::string s_player = Globals::glob_get_globals().p_map_get_current_map()->m_i_s_get_turn_order()[j];
+						if (Globals::glob_get_globals().plyr_get_turn_player()->s_get_name() == s_player) { continue; }
+						if (p_tile_tile->p_grsn_get_garrison(s_player)->m_s_p_unit_get_units().size() > 0)
+						{
+							m_i_s_garrison_indices[i_index++] = s_player;
+						}
+					}
 
 					if (i == 0)
 					{
@@ -181,9 +198,9 @@ void Camera::select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, 
 
 						b_cursor_updated = true;
 					}
-					else if (i == i_garrison_index)
+					else if (m_i_s_garrison_indices.contains(i))
 					{
-						p_asst_selected_asset = p_tile_tile->p_grsn_get_garrison();
+						p_asst_selected_asset = p_tile_tile->p_grsn_get_garrison(m_i_s_garrison_indices[i]);
 
 						b_cursor_updated = true;
 					}
@@ -208,7 +225,7 @@ void Camera::select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, 
 
 					if (i == 0)
 					{
-						std::shared_ptr<Garrison> p_grsn_garrison = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position)->p_grsn_get_garrison();
+						std::shared_ptr<Garrison> p_grsn_garrison = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position)->p_grsn_get_garrison(p_unit_unit->s_get_player());
 
 						p_grsn_garrison->remove_unit(p_unit_unit);
 
@@ -218,7 +235,7 @@ void Camera::select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, 
 					}
 					else if (i == i_mobilize_index)
 					{
-						p_asst_selected_asset = std::make_shared<MenuMode>("mobilize", (int)MenuMode::MenuModes::MENU_MODE_MOBILIZE, p_unit_unit);
+						p_asst_selected_asset = std::make_shared<MenuMode>("mobilize", MenuMode::MenuModes::MENU_MODE_MOBILIZE, p_unit_unit);
 
 						b_cursor_updated = true;
 					}
@@ -227,11 +244,11 @@ void Camera::select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, 
 				{
 					if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(p_mnmd_menu_mode->p_asst_get_operator()))
 					{
-						if (p_mnmd_menu_mode->i_get_mode() == (int)MenuMode::MenuModes::MENU_MODE_MOBILIZE)
+						if (p_mnmd_menu_mode->mnmd_get_mode() == MenuMode::MenuModes::MENU_MODE_MOBILIZE)
 						{
 							if (i == 0)
 							{
-								std::shared_ptr<Garrison> p_grsn_garrison = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position)->p_grsn_get_garrison();
+								std::shared_ptr<Garrison> p_grsn_garrison = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position)->p_grsn_get_garrison(p_unit_unit->s_get_player());
 
 								p_grsn_garrison->remove_unit(p_unit_unit);
 
@@ -260,14 +277,21 @@ void Camera::select(sf::Vector2i vc2i_mouse_position, Vector2 vec2_window_size, 
 			{
 				if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(p_mnmd_menu_mode->p_asst_get_operator()))
 				{
-					if (p_mnmd_menu_mode->i_get_mode() == (int)MenuMode::MenuModes::MENU_MODE_MOBILIZE)
+					if (p_mnmd_menu_mode->mnmd_get_mode() == MenuMode::MenuModes::MENU_MODE_MOBILIZE)
 					{
 						std::shared_ptr<Tile> p_tile_selected = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position);
 						std::shared_ptr<Tile> p_tile_destination = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_clicked_position);
 
 						if (p_tile_selected->b_move_unit(p_unit_unit, p_tile_destination))
 						{
-							p_asst_selected_asset = p_unit_unit;
+							if (p_unit_unit->i_get_mobility() > 0)
+							{
+								p_asst_selected_asset = std::make_shared<MenuMode>("mobilize", MenuMode::MenuModes::MENU_MODE_MOBILIZE, p_unit_unit);
+							}
+							else
+							{
+								p_asst_selected_asset = p_unit_unit;
+							}
 
 							int2_cursor_position = int2_clicked_position;
 
@@ -294,7 +318,7 @@ void Camera::cancel()
 	{
 		if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
 		{
-			p_asst_selected_asset = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position)->p_grsn_get_garrison();
+			p_asst_selected_asset = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position)->p_grsn_get_garrison(p_unit_unit->s_get_player());
 
 			b_cursor_updated = true;
 		}
@@ -308,9 +332,9 @@ void Camera::cancel()
 		{
 			if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(p_mnmd_menu_mode->p_asst_get_operator()))
 			{
-				if (p_mnmd_menu_mode->i_get_mode() == (int)MenuMode::MenuModes::MENU_MODE_MOBILIZE)
+				if (p_mnmd_menu_mode->mnmd_get_mode() == MenuMode::MenuModes::MENU_MODE_MOBILIZE)
 				{
-					p_asst_selected_asset = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position)->p_grsn_get_garrison();
+					p_asst_selected_asset = Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_cursor_position)->p_grsn_get_garrison(p_unit_unit->s_get_player());
 
 					b_cursor_updated = true;
 				}

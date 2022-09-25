@@ -12,6 +12,8 @@ struct MenuSprite {
 	std::string s_w;
 	std::string s_h;
 	std::string s_texture;
+
+	bool b_invert_gradient;
 };
 
 #endif

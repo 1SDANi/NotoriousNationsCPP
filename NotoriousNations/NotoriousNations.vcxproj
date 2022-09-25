@@ -27,6 +27,7 @@
     <ClCompile Include="Assets\Menu.cpp" />
     <ClCompile Include="Assets\MenuMode.cpp" />
     <ClCompile Include="Assets\MultiYield.cpp" />
+    <ClCompile Include="Assets\Player.cpp" />
     <ClCompile Include="Assets\SoilCover.cpp" />
     <ClCompile Include="Assets\Tile.cpp" />
     <ClCompile Include="Assets\TileCover.cpp" />
@@ -56,7 +57,9 @@
     <ClInclude Include="Assets\MenuSprite.hpp" />
     <ClInclude Include="Assets\MenuVariable.hpp" />
     <ClInclude Include="Assets\MultiYield.hpp" />
+    <ClInclude Include="Assets\Player.hpp" />
     <ClInclude Include="Assets\SoilCover.hpp" />
+    <ClInclude Include="Assets\GradientSprite.hpp" />
     <ClInclude Include="Assets\SubMenu.hpp" />
     <ClInclude Include="Assets\Tile.hpp" />
     <ClInclude Include="Assets\TileCover.hpp" />

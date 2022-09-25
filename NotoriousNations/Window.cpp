@@ -74,6 +74,11 @@ void Window::draw(const sf::Drawable& drawable)
 	wndw_window.draw(drawable);
 }
 
+void Window::draw(const sf::Drawable& drawable, std::shared_ptr<sf::Shader> p_shdr_shader)
+{
+	wndw_window.draw(drawable, &*p_shdr_shader);
+}
+
 void Window::end_draw()
 {
 	wndw_window.display();

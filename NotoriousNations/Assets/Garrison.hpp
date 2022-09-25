@@ -3,6 +3,7 @@
 #define Garrison_hpp
 
 #include "Unit.hpp"
+#include "Player.hpp"
 
 class Garrison : public Asset
 {
@@ -18,7 +19,7 @@ public:
 
 	std::shared_ptr<Unit> p_unit_get_unit(int i_id);
 
-	void add_unit(std::shared_ptr<Unit> unit_unit);
+	void add_unit(std::shared_ptr<Unit> unit_unit, bool b_update_units_texture);
 
 	void remove_unit(std::shared_ptr<Unit> unit_unit);
 

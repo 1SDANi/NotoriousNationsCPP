@@ -6,6 +6,9 @@ Game::Game()
 
 	Globals::glob_get_globals().p_asmp_get_asset_maps()->generate_maps();
 
+	Globals::glob_get_globals().p_map_get_current_map()->update_units_texture(Globals::glob_get_globals().p_asmp_get_asset_maps()->p_txtr_get_unit_type_atlas(),
+																			  Globals::glob_get_globals().p_asmp_get_asset_maps()->i_get_tile_size());
+
 	f_delta_time = clck_clock.restart().asSeconds();
 
 	p_txtr_cursor = std::make_shared<sf::Texture>(sf::Texture());
@@ -57,15 +60,32 @@ void Game::update()
 			{
 				if (std::shared_ptr<Tile> p_tile_tile = std::dynamic_pointer_cast<Tile>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
 				{
-					int i_garrison_index = p_tile_tile->p_grsn_get_garrison()->m_s_p_unit_get_units().size() > 0 ? 1 : -1;
+					std::map<int, std::string> m_i_s_garrison_indices = std::map<int, std::string>();
+
+					int i_index = 1;
+
+					if (p_tile_tile->p_grsn_get_garrison(Globals::glob_get_globals().plyr_get_turn_player()->s_get_name())->m_s_p_unit_get_units().size() > 0)
+					{
+						m_i_s_garrison_indices[i_index++] = Globals::glob_get_globals().plyr_get_turn_player()->s_get_name();
+					}
+
+					for (int j = 0; j < Globals::glob_get_globals().p_map_get_current_map()->m_i_s_get_turn_order().size(); j++)
+					{
+						std::string s_player = Globals::glob_get_globals().p_map_get_current_map()->m_i_s_get_turn_order()[j];
+						if (Globals::glob_get_globals().plyr_get_turn_player()->s_get_name() == s_player) { continue; }
+						if (p_tile_tile->p_grsn_get_garrison(s_player)->m_s_p_unit_get_units().size() > 0)
+						{
+							m_i_s_garrison_indices[i_index++] = s_player;
+						}
+					}
 
 					if (i == 0)
 					{
 						Globals::glob_get_globals().set_namebox_text_dom("Terraform");
 					}
-					else if (i == i_garrison_index)
+					else if (m_i_s_garrison_indices.contains(i))
 					{
-						Globals::glob_get_globals().set_namebox_text_dom("Garrison");
+						Globals::glob_get_globals().set_namebox_text_dom(Globals::glob_get_globals().p_map_get_current_map()->p_plyr_get_player(m_i_s_garrison_indices[i])->s_get_adjective() + " Garrison");
 					}
 				}
 				else if (std::shared_ptr<SoilCover> p_scvr_soil_cover = std::dynamic_pointer_cast<SoilCover>(Globals::glob_get_globals().p_cmra_get_camera()->get_selected_asset()))
@@ -96,7 +116,7 @@ void Game::update()
 				{
 					if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(p_mnmd_menu_mode->p_asst_get_operator()))
 					{
-						if (p_mnmd_menu_mode->i_get_mode() == (int)MenuMode::MenuModes::MENU_MODE_MOBILIZE)
+						if (p_mnmd_menu_mode->mnmd_get_mode() == MenuMode::MenuModes::MENU_MODE_MOBILIZE)
 						{
 							if (i == 0)
 							{
@@ -143,7 +163,7 @@ void Game::update()
 		{
 			if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(p_mnmd_menu_mode->p_asst_get_operator()))
 			{
-				if (p_mnmd_menu_mode->i_get_mode() == (int)MenuMode::MenuModes::MENU_MODE_MOBILIZE && p_tile_selected_tile != nullptr && p_tile_selected_tile->b_can_mobilize(p_unit_unit, p_tile_hover_tile))
+				if (p_mnmd_menu_mode->mnmd_get_mode() == MenuMode::MenuModes::MENU_MODE_MOBILIZE && p_tile_selected_tile != nullptr && p_tile_selected_tile->b_can_mobilize(p_unit_unit, p_tile_hover_tile))
 				{
 					std::string s_mobility_string = p_unit_unit->i_get_mobility() > 1 ? " moves " : " move ";
 
@@ -174,7 +194,7 @@ void Game::update()
 		{
 			if (std::shared_ptr<Unit> p_unit_unit = std::dynamic_pointer_cast<Unit>(p_mnmd_menu_mode->p_asst_get_operator()))
 			{
-				if (p_mnmd_menu_mode->i_get_mode() == (int)MenuMode::MenuModes::MENU_MODE_MOBILIZE)
+				if (p_mnmd_menu_mode->mnmd_get_mode() == MenuMode::MenuModes::MENU_MODE_MOBILIZE)
 				{
 					std::string s_mobility_string = p_unit_unit->i_get_mobility() > 1 ? " moves " : " move ";
 
@@ -252,6 +272,11 @@ void Game::draw()
 	sf::FloatRect frct_iconbox_bounds = p_menu_menu->frct_get_iconbox_bounds(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar");
 	sf::FloatRect frct_namebox_bounds = p_menu_menu->frct_get_namebox_bounds(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar");
 
+	if (Globals::glob_get_globals().p_cmra_get_camera()->int2_get_cursor_position().x >= 0 && Globals::glob_get_globals().p_cmra_get_camera()->int2_get_cursor_position().y >= 0)
+	{
+		Globals::glob_get_globals().draw(sprt_camera_cursor);
+	}
+
 	sf::RectangleShape iconbox_fill(sf::Vector2f(frct_iconbox_bounds.width, frct_iconbox_bounds.height));
 	iconbox_fill.setFillColor(sf::Color(64, 64, 64, 255));
 	iconbox_fill.setPosition(frct_iconbox_bounds.left, frct_iconbox_bounds.top);
@@ -265,23 +290,41 @@ void Game::draw()
 
 	if (Globals::glob_get_globals().p_cmra_get_camera()->int2_get_cursor_position().x >= 0 && Globals::glob_get_globals().p_cmra_get_camera()->int2_get_cursor_position().y >= 0)
 	{
-		Globals::glob_get_globals().draw(sprt_camera_cursor);
-
-		for (auto const& [i, s] : p_menu_menu->m_i_sprt_get_toolbar_sprites(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar"))
+		for (auto const& [i, s] : p_menu_menu->m_i_gtsp_get_toolbar_sprites(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar"))
 		{
-			Globals::glob_get_globals().draw(s);
+			std::shared_ptr<sf::Shader> p_shdr_player_color_shader = Globals::glob_get_globals().p_shdr_get_player_color_shader();
+
+			if (s.colr_primary_color == sf::Color::Transparent && s.colr_secondary_color == sf::Color::Transparent)
+			{
+				Globals::glob_get_globals().draw(s.sprt_sprite);
+			}
+			else
+			{
+				p_shdr_player_color_shader->setUniform("texture", sf::Shader::CurrentTexture);
+				p_shdr_player_color_shader->setUniform("primary", sf::Glsl::Vec4(s.colr_primary_color));
+				p_shdr_player_color_shader->setUniform("secondary", sf::Glsl::Vec4(s.colr_secondary_color));
+				p_shdr_player_color_shader->setUniform("invert", s.b_invert_gradient);
+
+				Globals::glob_get_globals().draw(s, p_shdr_player_color_shader);
+			}
 		}
 
 		if (p_menu_menu->i_get_cursor_position() >= 0)
 		{
 			Globals::glob_get_globals().draw(sprt_menu_cursor);
 		}
-		
 	}
 
-	for (auto const& [i, s] : p_menu_menu->m_i_sprt_get_submenu_sprites(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar"))
+	for (auto const& [i, s] : p_menu_menu->m_i_gtsp_get_submenu_sprites(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar"))
 	{
-		Globals::glob_get_globals().draw(s);
+		std::shared_ptr<sf::Shader> p_shdr_player_color_shader = Globals::glob_get_globals().p_shdr_get_player_color_shader();
+
+		p_shdr_player_color_shader->setUniform("texture", sf::Shader::CurrentTexture);
+		p_shdr_player_color_shader->setUniform("primary", sf::Glsl::Vec4(s.colr_primary_color));
+		p_shdr_player_color_shader->setUniform("secondary", sf::Glsl::Vec4(s.colr_secondary_color));
+		p_shdr_player_color_shader->setUniform("invert", s.b_invert_gradient);
+
+		Globals::glob_get_globals().draw(s, p_shdr_player_color_shader);
 	}
 
 	if (p_menu_menu->i_get_nametext_height(Globals::glob_get_globals().vec2_get_window_size(), "Toolbar") > 0)

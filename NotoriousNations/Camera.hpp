@@ -30,8 +30,8 @@ public:
 		CAMERA_OUTPUT_NUM_OUTPUTS
 	};
 
-	static const std::map<int, std::string> m_i_s_output_type_strings;
-	static const std::map<std::string, int> m_s_i_output_type_strings;
+	static const std::map<Camera::CameraOutput, std::string> m_cotp_s_output_type_strings;
+	static const std::map<std::string, Camera::CameraOutput> m_s_cotp_output_type_strings;
 
 	Camera();
 

@@ -15,14 +15,14 @@ public:
 	};
 
 	MenuMode();
-	MenuMode(std::string s_name, int i_menu_mode, std::shared_ptr<Asset> p_asst_operator);
+	MenuMode(std::string s_name, MenuModes mnmd_menu_mode, std::shared_ptr<Asset> p_asst_operator);
 
-	int i_get_mode();
+	MenuModes mnmd_get_mode();
 
 	std::shared_ptr<Asset> p_asst_get_operator();
 
 private:
-	const int i_menu_mode;
+	const MenuModes mnmd_menu_mode;
 
 	std::shared_ptr<Asset> p_asst_operator;
 };

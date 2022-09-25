@@ -43,6 +43,7 @@ public:
 
     void begin_draw();
     void draw(const sf::Drawable& drawable);
+    void draw(const GradientSprite gtsp_gradient_sprite, std::shared_ptr<sf::Shader> shdr_shader);
     void end_draw();
 
     void update_controllers();
@@ -71,6 +72,10 @@ public:
 
     std::shared_ptr<Map> p_map_get_current_map();
 
+    std::shared_ptr<Player> plyr_get_turn_player();
+
+    std::shared_ptr<sf::Shader> p_shdr_get_player_color_shader();
+
     static constexpr uint32_t hash(std::string_view data) noexcept {
         uint32_t hash = 5385;
 
@@ -83,6 +88,13 @@ private:
     Globals() : wndw_window("Notorious Nations")
     {
         path_roaming_data_path = generate_roaming_data_path();
+
+        p_shdr_player_color_shader = std::make_shared<sf::Shader>();
+
+        if (p_shdr_player_color_shader->loadFromFile(path_roaming_data_path.string() + "\\PlayerColorShader.frag", sf::Shader::Type::Fragment))
+        {
+            std::wcout << "shader loaded from " << path_roaming_data_path.c_str() << "\\PlayerColorShader.frag\n";
+        }
 
         p_asmp_asset_maps = std::shared_ptr<AssetMaps>(new AssetMaps(generate_roaming_data_path()));
 
@@ -123,6 +135,8 @@ private:
     std::shared_ptr<Camera> p_cmra_camera;
 
     std::shared_ptr<Menu> p_menu_menu;
+
+    std::shared_ptr<sf::Shader> p_shdr_player_color_shader;
 
     std::filesystem::path path_roaming_data_path;
 

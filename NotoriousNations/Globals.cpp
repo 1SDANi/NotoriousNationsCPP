@@ -66,6 +66,11 @@ void Globals::draw(const sf::Drawable& drawable)
 	wndw_window.draw(drawable);
 }
 
+void Globals::draw(const GradientSprite gtsp_gradient_sprite, std::shared_ptr<sf::Shader> shdr_shader)
+{
+	wndw_window.draw(gtsp_gradient_sprite.sprt_sprite, shdr_shader);
+}
+
 void Globals::end_draw()
 {
 	wndw_window.end_draw();
@@ -174,4 +179,14 @@ std::string Globals::s_get_current_map()
 std::shared_ptr<Map> Globals::p_map_get_current_map()
 {
 	return p_asmp_get_asset_maps()->p_map_get_map(s_get_current_map());
+}
+
+std::shared_ptr<Player> Globals::plyr_get_turn_player()
+{
+	return p_map_get_current_map()->p_plyr_get_player(p_map_get_current_map()->m_i_s_get_turn_order()[p_map_get_current_map()->i_get_turn_player()]);
+}
+
+std::shared_ptr<sf::Shader> Globals::p_shdr_get_player_color_shader()
+{
+	return p_shdr_player_color_shader;
 }

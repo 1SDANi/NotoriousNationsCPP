@@ -36,7 +36,7 @@ std::map<int, sf::FloatRect> Menu::m_i_frct_get_icon_bounds(Vector2 vec2_window_
 
 	sf::Vector2f vc2f_icon_screen_coordinates;
 
-	for (int i = 0; i < m_i_sprt_toolbar_sprites.size(); i++)
+	for (int i = 0; i < m_i_gtsp_toolbar_sprites.size(); i++)
 	{
 		vc2f_icon_screen_coordinates = vc2f_get_icon_screen_coordinates(vec2_window_size, s_name, i);
 
@@ -57,7 +57,7 @@ void Menu::update_submenu(Vector2 vec2_window_size, std::string s_name)
 
 void Menu::clear_toolbar()
 {
-	m_i_sprt_toolbar_sprites = std::map<int, sf::Sprite>();
+	m_i_gtsp_toolbar_sprites = std::map<int, GradientSprite>();
 	m_i_s_toolbar_sprite_names = std::map<int, std::string>();
 	i_cursor_position = -1;
 }
@@ -72,21 +72,44 @@ void Menu::populate_toolbar_tile(Tile tile_selected_tile)
 
 	Int2 int2_camera_cursor = Globals::glob_get_globals().p_cmra_get_camera()->int2_get_cursor_position();
 
-	populate_orphan_icon(i++, "terraform");
+	populate_orphan_icon(i++, "terraform", sf::Color::Green, sf::Color::Blue, false);
 
-	if (Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_camera_cursor)->p_grsn_get_garrison()->m_s_p_unit_get_units().size() > 0)
+	if (Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_camera_cursor)->p_grsn_get_garrison(Globals::glob_get_globals().plyr_get_turn_player()->s_get_name())->m_s_p_unit_get_units().size() > 0)
 	{
-		populate_orphan_icon(i++, "garrison");
+		populate_orphan_icon(i++,
+			"garrison",
+			Globals::glob_get_globals().plyr_get_turn_player()->colr_get_primary_color(),
+			Globals::glob_get_globals().plyr_get_turn_player()->colr_get_secondary_color(),
+			false);
+	}
+
+	for (int j = 0; j < Globals::glob_get_globals().p_map_get_current_map()->m_i_s_get_turn_order().size(); j++)
+	{
+		std::string s_player = Globals::glob_get_globals().p_map_get_current_map()->m_i_s_get_turn_order()[j];
+		if (Globals::glob_get_globals().plyr_get_turn_player()->s_get_name() == s_player) { continue; }
+		if (Globals::glob_get_globals().p_map_get_current_map()->p_tile_get_tile(int2_camera_cursor)->p_grsn_get_garrison(s_player)->m_s_p_unit_get_units().size() > 0)
+		{
+			populate_orphan_icon(i++,
+				"garrison",
+				Globals::glob_get_globals().p_map_get_current_map()->p_plyr_get_player(s_player)->colr_get_primary_color(),
+				Globals::glob_get_globals().p_map_get_current_map()->p_plyr_get_player(s_player)->colr_get_secondary_color(),
+				false);
+		}
 	}
 }
 
-void Menu::populate_orphan_icon(int i_index, std::string s_name)
+void Menu::populate_orphan_icon(int i_index, std::string s_name, sf::Color colr_primary, sf::Color colr_secondary, bool b_invert_gradient)
 {
-	sf::Sprite sprt_temp_sprite = sf::Sprite();
+	GradientSprite gtsp_temp_sprite = GradientSprite();
 
-	sprt_temp_sprite.setTexture(*m_s_p_txtr_textures[s_name]);
+	gtsp_temp_sprite.sprt_sprite = sf::Sprite();
+	gtsp_temp_sprite.sprt_sprite.setTexture(*m_s_p_txtr_textures[s_name]);
 
-	m_i_sprt_toolbar_sprites.emplace(i_index, sprt_temp_sprite);
+	gtsp_temp_sprite.colr_primary_color = colr_primary;
+	gtsp_temp_sprite.colr_secondary_color = colr_secondary;
+	gtsp_temp_sprite.b_invert_gradient = b_invert_gradient;
+
+	m_i_gtsp_toolbar_sprites.emplace(i_index, gtsp_temp_sprite);
 	m_i_s_toolbar_sprite_names.emplace(i_index, s_name);
 }
 
@@ -104,17 +127,22 @@ void Menu::populate_toolbar_soil_covers(std::string s_selected_soil_cover, std::
 
 		i = int2_atlas_coords.x + int2_atlas_coords.y * p_txtr_atlas_texture->getSize().x / i_tile_size;
 
-		sf::Sprite sprt_temp_sprite = sf::Sprite();
+		GradientSprite gtsp_temp_sprite = GradientSprite();
 
-		sprt_temp_sprite.setTexture(*p_txtr_atlas_texture);
-		sprt_temp_sprite.setTextureRect(sf::Rect(int2_atlas_coords.x * i_tile_size,
+		gtsp_temp_sprite.sprt_sprite = sf::Sprite();
+		gtsp_temp_sprite.colr_primary_color = sf::Color::Transparent;
+		gtsp_temp_sprite.colr_secondary_color = sf::Color::Transparent;
+		gtsp_temp_sprite.b_invert_gradient = false;
+
+		gtsp_temp_sprite.sprt_sprite.setTexture(*p_txtr_atlas_texture);
+		gtsp_temp_sprite.sprt_sprite.setTextureRect(sf::Rect(int2_atlas_coords.x * i_tile_size,
 										((int)(p_txtr_atlas_texture->getSize().y)) - int2_atlas_coords.y * i_tile_size,
 										i_tile_size,
 										-i_tile_size));
 
 		if (pair_pair.first == s_selected_soil_cover) { i_cursor_position = i; }
 
-		m_i_sprt_toolbar_sprites.emplace(i, sprt_temp_sprite);
+		m_i_gtsp_toolbar_sprites.emplace(i, gtsp_temp_sprite);
 		m_i_s_toolbar_sprite_names.emplace(i, pair_pair.second.s_get_name());
 	}
 }
@@ -131,15 +159,20 @@ void Menu::populate_toolbar_units(std::map<std::string, std::shared_ptr<Unit>> m
 	{
 		Int2 int2_atlas_coords = pair_pair.second->untp_get_unit_type().int2_get_atlas_coords();
 
-		sf::Sprite sprt_temp_sprite = sf::Sprite();
+		GradientSprite gtsp_temp_sprite = GradientSprite();
 
-		sprt_temp_sprite.setTexture(*p_txtr_atlas_texture);
-		sprt_temp_sprite.setTextureRect(sf::Rect(int2_atlas_coords.x * i_tile_size,
-									    ((int)(p_txtr_atlas_texture->getSize().y)) - int2_atlas_coords.y * i_tile_size,
-									    i_tile_size,
-									   -i_tile_size));
+		gtsp_temp_sprite.sprt_sprite = sf::Sprite();
+		gtsp_temp_sprite.sprt_sprite.setTexture(*p_txtr_atlas_texture);
+		gtsp_temp_sprite.sprt_sprite.setTextureRect(sf::Rect(int2_atlas_coords.x * i_tile_size,
+			((int)(p_txtr_atlas_texture->getSize().y)) - int2_atlas_coords.y * i_tile_size,
+			i_tile_size,
+			-i_tile_size));
 
-		m_i_sprt_toolbar_sprites.emplace(i, sprt_temp_sprite);
+		gtsp_temp_sprite.colr_primary_color = Globals::glob_get_globals().p_map_get_current_map()->p_plyr_get_player(pair_pair.second->s_get_player())->colr_get_primary_color();
+		gtsp_temp_sprite.colr_secondary_color = Globals::glob_get_globals().p_map_get_current_map()->p_plyr_get_player(pair_pair.second->s_get_player())->colr_get_secondary_color();
+		gtsp_temp_sprite.b_invert_gradient = Globals::glob_get_globals().p_map_get_current_map()->p_plyr_get_player(pair_pair.second->s_get_player())->b_get_invert_unit_gradient();
+
+		m_i_gtsp_toolbar_sprites.emplace(i, gtsp_temp_sprite);
 		m_i_s_toolbar_sprite_names.emplace(i, std::to_string(pair_pair.second->i_get_id()));
 
 		i++;
@@ -154,12 +187,20 @@ void Menu::populate_toolbar_unit_actions(std::shared_ptr<Unit> s_p_unit_unit, in
 
 	int i = 0;
 
-	populate_orphan_icon(i++, "discharge");
+	populate_orphan_icon(i++,
+						 "discharge",
+						 Globals::glob_get_globals().p_map_get_current_map()->p_plyr_get_player(s_p_unit_unit->s_get_player())->colr_get_primary_color(),
+						 Globals::glob_get_globals().p_map_get_current_map()->p_plyr_get_player(s_p_unit_unit->s_get_player())->colr_get_secondary_color(),
+						 false);
 
 	if (s_p_unit_unit->i_get_mobility() > 0)
 	{
 		if (i == i_selected_option) { i_cursor_position = i; }
-		populate_orphan_icon(i++, "mobilize");
+		populate_orphan_icon(i++,
+							 "mobilize",
+							 Globals::glob_get_globals().p_map_get_current_map()->p_plyr_get_player(s_p_unit_unit->s_get_player())->colr_get_primary_color(),
+							 Globals::glob_get_globals().p_map_get_current_map()->p_plyr_get_player(s_p_unit_unit->s_get_player())->colr_get_secondary_color(),
+							 false);
 	}
 }
 
@@ -249,7 +290,7 @@ float Menu::get_value(Vector2 vec2_window_size, std::string s_name, std::string 
 void Menu::generate_menus(std::filesystem::path path_roaming_data_path)
 {
 	clear_toolbar();
-	m_s_m_i_sprt_submenu_sprites = std::map<std::string, std::map<int, sf::Sprite>>();
+	m_s_m_i_gtsp_submenu_sprites = std::map<std::string, std::map<int, GradientSprite>>();
 	std::vector<std::filesystem::path>  v_path_matching_paths = FolderCrawler::b_crawl_folder(path_roaming_data_path.string() + "\\JSON\\Menu\\menus", {L".json"});
 	if (v_path_matching_paths.size() > 0)
 	{
@@ -267,7 +308,7 @@ void Menu::generate_menus(std::filesystem::path path_roaming_data_path)
 
 			m_s_sbmn_submenus[sbmn_iteration.s_name] = sbmn_iteration;
 
-			m_s_m_i_sprt_submenu_sprites.emplace(sbmn_iteration.s_name, std::map<int, sf::Sprite>());
+			m_s_m_i_gtsp_submenu_sprites.emplace(sbmn_iteration.s_name, std::map<int, GradientSprite>());
 
 			generate_submenu_sprites(path_roaming_data_path, sbmn_iteration.s_name);
 		}
@@ -283,6 +324,18 @@ std::string Menu::s_get_json(nlohmann::json json_json, std::string key)
 	else
 	{
 		return "";
+	}
+}
+
+bool Menu::b_get_json(nlohmann::json json_json, std::string key)
+{
+	if (json_json.at(key).is_boolean())
+	{
+		return json_json.at(key);
+	}
+	else
+	{
+		return false;
 	}
 }
 
@@ -432,6 +485,7 @@ std::map<int, MenuSprite> Menu::m_i_mnsp_populate_menu_sprites(nlohmann::json js
 		mncl_menu_sprite.s_r = s_get_json(json_json.at(std::to_string(i)), "s_r");
 		mncl_menu_sprite.s_w = s_get_json(json_json.at(std::to_string(i)), "s_w");
 		mncl_menu_sprite.s_h = s_get_json(json_json.at(std::to_string(i)), "s_h");
+		mncl_menu_sprite.b_invert_gradient = b_get_json(json_json.at(std::to_string(i)), "b_invert_gradient");
 		mncl_menu_sprite.s_texture = s_get_json(json_json.at(std::to_string(i)), "s_texture");
 
 		m_i_mnsp_menu_sprites.emplace(i, mncl_menu_sprite);
@@ -455,9 +509,10 @@ void Menu::generate_submenu_sprites(std::filesystem::path path_roaming_data_path
 			m_s_p_txtr_textures.emplace(mnsp_menu_sprite.s_texture, std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture)));
 		}
 		
-		m_s_m_i_sprt_submenu_sprites.at(s_name).emplace(i_index, sf::Sprite());
-
-		m_s_m_i_sprt_submenu_sprites.at(s_name).at(i_index).setTexture(*m_s_p_txtr_textures.at(mnsp_menu_sprite.s_texture));
+		m_s_m_i_gtsp_submenu_sprites.at(s_name).emplace(i_index, GradientSprite());
+		m_s_m_i_gtsp_submenu_sprites.at(s_name).at(i_index).sprt_sprite = sf::Sprite();
+		m_s_m_i_gtsp_submenu_sprites.at(s_name).at(i_index).sprt_sprite.setTexture(*m_s_p_txtr_textures.at(mnsp_menu_sprite.s_texture));
+		m_s_m_i_gtsp_submenu_sprites.at(s_name).at(i_index).b_invert_gradient = mnsp_menu_sprite.b_invert_gradient;
 	}
 
 	if (!m_s_p_txtr_textures.contains("garrison"))
@@ -476,6 +531,15 @@ void Menu::generate_submenu_sprites(std::filesystem::path path_roaming_data_path
 		txtr_temp_texture.loadFromFile(path_roaming_data_path.string() + "\\JSON\\Menu\\textures\\Discharge.png");
 
 		m_s_p_txtr_textures.emplace("discharge", std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture)));
+	}
+
+	if (!m_s_p_txtr_textures.contains("population"))
+	{
+		sf::Texture txtr_temp_texture;
+
+		txtr_temp_texture.loadFromFile(path_roaming_data_path.string() + "\\JSON\\Menu\\textures\\Population.png");
+
+		m_s_p_txtr_textures.emplace("population", std::make_shared<sf::Texture>(sf::Texture(txtr_temp_texture)));
 	}
 
 	if (!m_s_p_txtr_textures.contains("mobilize"))
@@ -515,28 +579,34 @@ void Menu::generate_submenu_sprites(std::filesystem::path path_roaming_data_path
 	}
 }
 
-std::map<int, sf::Sprite> Menu::m_i_sprt_get_submenu_sprites(Vector2 vec2_window_size, std::string s_name)
+std::map<int, GradientSprite> Menu::m_i_gtsp_get_submenu_sprites(Vector2 vec2_window_size, std::string s_name)
 {
 	for (auto const& [i_index, mnsp_menu_sprite] : m_s_sbmn_submenus[s_name].m_i_mnsp_menu_sprites)
 	{
-		m_s_m_i_sprt_submenu_sprites.at(s_name).at(i_index).setPosition(get_value(vec2_window_size, s_name, mnsp_menu_sprite.s_x), get_value(vec2_window_size, s_name, mnsp_menu_sprite.s_y));
-		m_s_m_i_sprt_submenu_sprites.at(s_name).at(i_index).setRotation(get_value(vec2_window_size, s_name, mnsp_menu_sprite.s_r));
-		m_s_m_i_sprt_submenu_sprites.at(s_name).at(i_index).setScale(get_value(vec2_window_size, s_name, mnsp_menu_sprite.s_w), get_value(vec2_window_size, s_name, mnsp_menu_sprite.s_h));
+		m_s_m_i_gtsp_submenu_sprites.at(s_name).at(i_index).sprt_sprite.setPosition(get_value(vec2_window_size, s_name, mnsp_menu_sprite.s_x), get_value(vec2_window_size, s_name, mnsp_menu_sprite.s_y));
+		m_s_m_i_gtsp_submenu_sprites.at(s_name).at(i_index).sprt_sprite.setRotation(get_value(vec2_window_size, s_name, mnsp_menu_sprite.s_r));
+
+		m_s_m_i_gtsp_submenu_sprites.at(s_name).at(i_index).colr_primary_color = Globals::glob_get_globals().plyr_get_turn_player()->colr_get_primary_color();
+		m_s_m_i_gtsp_submenu_sprites.at(s_name).at(i_index).colr_secondary_color = Globals::glob_get_globals().plyr_get_turn_player()->colr_get_secondary_color();
+
+		m_s_m_i_gtsp_submenu_sprites.at(s_name).at(i_index).b_invert_gradient = mnsp_menu_sprite.b_invert_gradient;
+
+		m_s_m_i_gtsp_submenu_sprites.at(s_name).at(i_index).sprt_sprite.setScale(get_value(vec2_window_size, s_name, mnsp_menu_sprite.s_w), get_value(vec2_window_size, s_name, mnsp_menu_sprite.s_h));
 	}
 
-	return m_s_m_i_sprt_submenu_sprites.at(s_name);
+	return m_s_m_i_gtsp_submenu_sprites.at(s_name);
 }
 
-std::map<int, sf::Sprite> Menu::m_i_sprt_get_toolbar_sprites(Vector2 vec2_window_size, std::string s_name)
+std::map<int, GradientSprite> Menu::m_i_gtsp_get_toolbar_sprites(Vector2 vec2_window_size, std::string s_name)
 {
-	for (int i = 0; i < m_i_sprt_toolbar_sprites.size(); i++)
+	for (int i = 0; i < m_i_gtsp_toolbar_sprites.size(); i++)
 	{
-		m_i_sprt_toolbar_sprites.at(i).setPosition(vc2f_get_icon_screen_coordinates(vec2_window_size, s_name, i));
-		m_i_sprt_toolbar_sprites.at(i).setRotation(0);
-		m_i_sprt_toolbar_sprites.at(i).setScale(f_get_icon_scale(vec2_window_size, s_name), f_get_icon_scale(vec2_window_size, s_name));
+		m_i_gtsp_toolbar_sprites.at(i).sprt_sprite.setPosition(vc2f_get_icon_screen_coordinates(vec2_window_size, s_name, i));
+		m_i_gtsp_toolbar_sprites.at(i).sprt_sprite.setRotation(0);
+		m_i_gtsp_toolbar_sprites.at(i).sprt_sprite.setScale(f_get_icon_scale(vec2_window_size, s_name), f_get_icon_scale(vec2_window_size, s_name));
 	}
 
-	return m_i_sprt_toolbar_sprites;
+	return m_i_gtsp_toolbar_sprites;
 }
 
 std::map<int, std::string> Menu::m_i_s_get_toolbar_sprite_names(Vector2 vec2_window_size, std::string s_name)
